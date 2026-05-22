@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"d:\\\\AppKidsgartenManagement\\\\brainy-kids-app\" -Force)",
+      "Bash(Select-Object Name, PSIsContainer)",
+      "Bash(Format-Table -AutoSize)",
+      "Bash(npm install *)",
+      "PowerShell(Get-ChildItem \"C:\\\\Program Files\\\\nodejs\" -ErrorAction SilentlyContinue | Select-Object Name; Get-ChildItem \"C:\\\\Program Files \\(x86\\)\\\\nodejs\" -ErrorAction SilentlyContinue | Select-Object Name; Get-ChildItem \"$env:APPDATA\\\\npm\" -ErrorAction SilentlyContinue | Select-Object Name -First 5; Get-ChildItem \"$env:LOCALAPPDATA\\\\Programs\\\\nodejs\" -ErrorAction SilentlyContinue | Select-Object Name -First 5)",
+      "Bash(Get-ChildItem -Path \"d:\\\\AppKidsgartenManagement\\\\brainy-kids-app\" -Directory)",
+      "Bash(Select-Object Name)",
+      "Bash(docker compose *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost/)",
+      "Bash(Start-Sleep -Seconds 15)",
+      "Bash(mkdir -p \"d:/AppKidsgartenManagement/brainy-kids-app/FrontEnd/src/app/\\(print\\)/teacher/[id]/payslip\" 2>&1 || true)"
+    ],
+    "additionalDirectories": [
+      "d:\\AppKidsgartenManagement\\brainy-kids-app\\FrontEnd\\src\\app\\(print)\\teacher\\[id]"
+    ]
+  }
+}
