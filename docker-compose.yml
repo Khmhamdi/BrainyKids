@@ -24,9 +24,7 @@ services:
 
   # ─── Backend NestJS ─────────────────────────────────────────
   backend:
-    build:
-      context: ./BackEnd
-      dockerfile: Dockerfile
+    image: ghcr.io/khmhamdi/brainykids/backend:latest
     container_name: brainy-kids-api
     restart: unless-stopped
     environment:
@@ -44,13 +42,10 @@ services:
       - brainy-uploads:/app/uploads
     networks:
       - brainy-network
-    # Pas de healthcheck — le backend gère sa propre initialisation via entrypoint.sh
 
   # ─── Frontend Next.js ────────────────────────────────────────
   frontend:
-    build:
-      context: ./FrontEnd
-      dockerfile: ../Dockerfile.frontend
+    image: ghcr.io/khmhamdi/brainykids/frontend:latest
     container_name: brainy-kids-frontend
     restart: unless-stopped
     environment:
