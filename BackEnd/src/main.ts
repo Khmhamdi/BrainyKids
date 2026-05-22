@@ -27,6 +27,7 @@ async function bootstrap() {
     'http://localhost:3000',
     'http://localhost:3001',
     'http://localhost:80',
+    'http://brainykids.duckdns.org',
   ];
 
   app.enableCors({
