@@ -8,6 +8,7 @@ const mockPrisma = {
     count: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
+    updateMany: jest.fn(),
     groupBy: jest.fn(),
   },
 };
