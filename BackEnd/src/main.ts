@@ -20,19 +20,21 @@ async function bootstrap() {
   // Sécurité
   app.use(helmet());
 
-  // CORS — autorise toutes les origines localhost (dev + prod via nginx)
-  const allowedOrigins = [
-    process.env.FRONTEND_URL || 'http://localhost',
+  // CORS — FRONTEND_URL accepte plusieurs origines séparées par ","
+  // ex: FRONTEND_URL=http://192.168.1.100,http://brainykids.duckdns.org
+  const envOrigins = (process.env.FRONTEND_URL || '')
+    .split(',').map(o => o.trim()).filter(Boolean);
+
+  const allowedOrigins = Array.from(new Set([
+    ...envOrigins,
     'http://localhost',
     'http://localhost:3000',
     'http://localhost:3001',
-    'http://localhost:80',
-    'http://brainykids.duckdns.org',
-  ];
+  ]));
 
   app.enableCors({
     origin: (origin, callback) => {
-      // Autoriser les requêtes sans origin (Postman, curl, SSR)
+      // Autoriser les requêtes sans origin (Postman, curl, SSR Next.js)
       if (!origin) return callback(null, true);
       if (allowedOrigins.includes(origin)) return callback(null, true);
       callback(new Error(`CORS bloqué pour l'origine: ${origin}`));

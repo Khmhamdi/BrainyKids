@@ -1,0 +1,60 @@
+# Développement local — hot reload activé
+# Usage : docker compose -f docker-compose.dev.yml up
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: brainy-kids-db-dev
+    environment:
+      POSTGRES_USER: bkadmin
+      POSTGRES_PASSWORD: bkpassword
+      POSTGRES_DB: brainy_kids_dev
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bkadmin -d brainy_kids_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./BackEnd
+      dockerfile: Dockerfile.dev
+    container_name: brainy-kids-api-dev
+    volumes:
+      - ./BackEnd:/app
+      - /app/node_modules
+    ports:
+      - "4000:4000"
+    environment:
+      DATABASE_URL: postgresql://bkadmin:bkpassword@db:5432/brainy_kids_dev
+      JWT_SECRET: dev-secret-local
+      FRONTEND_URL: http://localhost:3001
+      NODE_ENV: development
+      PORT: 4000
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./FrontEnd
+      dockerfile: Dockerfile.dev
+    container_name: brainy-kids-frontend-dev
+    volumes:
+      - ./FrontEnd/src:/app/src
+      - ./FrontEnd/public:/app/public
+    ports:
+      - "3001:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:4000/api
+      NODE_ENV: development
+    depends_on:
+      - backend
+
+volumes:
+  pgdata_dev:
+    name: brainy-kids-pgdata-dev
