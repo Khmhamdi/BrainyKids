@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const PUBLIC_PATHS = ['/sign-in', '/logout'];
+const PUBLIC_PATHS = ['/', '/sign-in', '/logout', '/pre-inscription', '/clubs-ete'];
 
 // Routes connues de l'application
 const KNOWN_PATHS = [
@@ -16,6 +16,7 @@ const KNOWN_PATHS = [
   '/list/clubs-ete',
   '/list/messages',
   '/list/notifications',
+  '/list/pre-inscriptions',
   '/profile', '/settings',
 ];
 
@@ -41,7 +42,7 @@ export function middleware(request: NextRequest) {
   }
 
   // 2. Routes publiques : toujours accessibles
-  if (PUBLIC_PATHS.some(p => pathname.startsWith(p))) {
+  if (PUBLIC_PATHS.some(p => p === '/' ? pathname === '/' : pathname.startsWith(p))) {
     return NextResponse.next();
   }
 

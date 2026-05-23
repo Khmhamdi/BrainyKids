@@ -242,6 +242,35 @@ export const schedules = {
   delete: (id: string)                => apiFetch<any>(`/schedules/${id}`, { method: 'DELETE' }),
 };
 
+// ─── API publique (sans token) ────────────────────────────────
+const API_BASE_PUBLIC = process.env.NEXT_PUBLIC_API_URL || 'http://localhost/api';
+
+export const publicApi = {
+  clubsEte: () =>
+    fetch(`${API_BASE_PUBLIC}/clubs/public?type=ete`)
+      .then(r => r.json()) as Promise<any[]>,
+};
+
+// ─── Pré-inscriptions ─────────────────────────────────────────
+
+export const preRegistrations = {
+  submit: (data: any) =>
+    fetch(`${API_BASE_PUBLIC}/pre-registrations`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }).then(async res => {
+      if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message || 'Erreur'); }
+      return res.json();
+    }),
+  list:    (status?: string) => apiFetch<any[]>(`/pre-registrations${status ? `?status=${status}` : ''}`),
+  stats:   ()                => apiFetch<any>('/pre-registrations/stats'),
+  approve: (id: string)      => apiFetch<any>(`/pre-registrations/${id}/approve`, { method: 'PUT' }),
+  reject:  (id: string, reason: string) =>
+    apiFetch<any>(`/pre-registrations/${id}/reject`, { method: 'PUT', body: JSON.stringify({ reason }) }),
+  remove:  (id: string)      => apiFetch<any>(`/pre-registrations/${id}`, { method: 'DELETE' }),
+};
+
 // ─── Paramètres / Lookups ─────────────────────────────────────
 export const settings = {
   getLookups: (category?: string, activeOnly?: boolean) => {

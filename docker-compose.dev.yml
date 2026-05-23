@@ -25,8 +25,9 @@ services:
       dockerfile: Dockerfile.dev
     container_name: brainy-kids-api-dev
     volumes:
-      - ./BackEnd:/app
-      - /app/node_modules
+      - ./BackEnd/src:/app/src
+      - ./BackEnd/prisma:/app/prisma
+      - ./BackEnd/entrypoint.dev.sh:/app/entrypoint.dev.sh
     ports:
       - "4000:4000"
     environment:
@@ -48,7 +49,7 @@ services:
       - ./FrontEnd/src:/app/src
       - ./FrontEnd/public:/app/public
     ports:
-      - "3001:3000"
+      - "3001:3001"
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:4000/api
       NODE_ENV: development

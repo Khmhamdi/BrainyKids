@@ -18,6 +18,7 @@ import { NotesModule } from './notes/notes.module';
 import { ClubsModule } from './clubs/clubs.module';
 import { SettingsModule } from './settings/settings.module';
 import { SchedulesModule } from './schedules/schedules.module';
+import { PreRegistrationsModule } from './pre-registrations/pre-registrations.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { SchedulesModule } from './schedules/schedules.module';
     ClubsModule,
     SettingsModule,
     SchedulesModule,
+    PreRegistrationsModule,
   ],
 })
 export class AppModule {}

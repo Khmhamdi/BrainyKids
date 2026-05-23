@@ -384,3 +384,22 @@ model Notification {
   created_at  DateTime @default(now())
   user        User     @relation(fields: [user_id], references: [id])
 }
+
+model PreRegistration {
+  id               String    @id @default(uuid())
+  child_full_name  String
+  date_of_birth    DateTime
+  gender           String    @default("M")
+  desired_class    String
+  school_year      String
+  parent_full_name String
+  parent_phone     String
+  parent_email     String
+  parent_relation  String    @default("father")
+  message          String?
+  status           String    @default("pending")
+  rejection_reason String?
+  created_at       DateTime  @default(now())
+  processed_at     DateTime?
+  processed_by     String?
+}

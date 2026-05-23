@@ -6,6 +6,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Express } from 'express';
 
 @Controller('upload')
 @UseGuards(JwtAuthGuard)
@@ -28,7 +29,7 @@ export class UploadController {
       cb(null, true);
     },
   }))
-  uploadPhoto(@UploadedFile() file: Express.Multer.File) {
+  uploadPhoto(@UploadedFile() file: any) {
     if (!file) throw new BadRequestException('Aucun fichier reçu');
     // Retourner l'URL publique accessible via nginx
     const url = `/uploads/photos/${file.filename}`;

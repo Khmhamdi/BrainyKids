@@ -43,7 +43,7 @@ export default function LoginPage() {
         <div className="flex flex-col items-center mb-8">
           <Image src="/LogoBK.png" alt="Brainy Kids" width={80} height={80} />
           <h1 className="text-2xl font-bold text-gray-800 mt-3">Brainy Kids</h1>
-          <p className="text-sm text-gray-500 mt-1">Jardin d'enfants — Manouba</p>
+          <p className="text-sm text-gray-500 mt-1">Jardin d'enfants — El Mourouj 6</p>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
