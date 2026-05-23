@@ -36,7 +36,7 @@ async function main() {
 	];
 	const clubs = [];
 	for (const c of clubNames) {
-		clubs.push(await prisma.club.create({ data: { name: c.name, description: c.description, membership_fee: c.fee, age_group: '3-5' } }));
+		clubs.push(await prisma.club.create({ data: { name: c.name, description: c.description, price: c.fee, age_group: '3-5' } }));
 	}
 
 	const parents = [];
