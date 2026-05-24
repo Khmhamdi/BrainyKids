@@ -20,8 +20,10 @@ RUN npx prisma generate
 # Compiler TypeScript avec nest build
 RUN npm run build
 
-# Vérifier que le build a bien produit dist/main.js
-RUN ls -la dist/ && test -f dist/main.js || (echo "ERROR: dist/main.js not found after build!" && exit 1)
+# Vérifier que le build a bien produit les fichiers critiques
+RUN test -f dist/main.js || (echo "ERROR: dist/main.js not found!" && exit 1) && \
+    test -f dist/prisma/prisma.module.js || (echo "ERROR: dist/prisma/prisma.module.js not found — src/prisma/ excluded from build!" && exit 1) && \
+    echo "✅ Build OK: dist/main.js + dist/prisma/prisma.module.js présents"
 
 # Nettoyer les devDependencies
 RUN npm prune --omit=dev
