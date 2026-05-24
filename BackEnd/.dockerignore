@@ -1,0 +1,7 @@
+node_modules
+dist
+.git
+*.log
+*.tsbuildinfo
+prisma/seed.d.ts
+prisma/seed.js.map

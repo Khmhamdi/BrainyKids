@@ -29,5 +29,5 @@ Thumbs.db
 coverage/
 **/coverage/
 
-# Docker
-.dockerignore
+# Docker (ne pas ignorer .dockerignore — il doit être commité)
+
