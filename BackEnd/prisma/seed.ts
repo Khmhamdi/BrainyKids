@@ -36,7 +36,7 @@ async function main() {
 		},
 	});
 
-		// 2 Enseignantes
+		// 3 Enseignantes
 		const enseignantesData = [
 			{
 				username: 'enseignante1',
@@ -54,6 +54,14 @@ async function main() {
 				email: 's2@kinder.com',
 				phone: '10000004',
 			},
+			{
+				username: 'enseignante3',
+				password_hash: 'enseignante789',
+				role: 'teacher',
+				full_name: 'نور معلمة',
+				email: 's3@kinder.com',
+				phone: '10000005',
+			},
 		];
 		const enseignanteIds: string[] = [];
 		for (const ens of enseignantesData) {
@@ -68,6 +76,26 @@ async function main() {
 			enseignanteIds.push(teacher.id);
 		}
 
+		// Femme de service
+		const fdsUser = await prisma.user.create({
+			data: {
+				username: 'femmeservice',
+				password_hash: 'fds123',
+				role: 'teacher',
+				full_name: 'أمينة الخادمة',
+				email: 'fds@kinder.com',
+				phone: '10000006',
+			},
+		});
+		await prisma.teacher.create({
+			data: {
+				user_id: fdsUser.id,
+				hire_date: new Date('2022-09-01'),
+				qualification: 'Bac',
+				fonction: 'femme_de_service',
+			},
+		});
+
 	// Clubs (3 clubs + Cantine)
 	const clubNames = [
 		{ name: 'الرسم', description: 'نادي الرسم', fee: 20 },
@@ -81,7 +109,7 @@ async function main() {
 			data: {
 				name: c.name,
 				description: c.description,
-				membership_fee: c.fee,
+				price: c.fee,
 				age_group: '3-5',
 			},
 		}));
@@ -152,6 +180,15 @@ async function main() {
 							schedule_id: schedule.id,
 						},
 					});
+					const class3 = await prisma.class.create({
+						data: {
+							name: 'الصف الكبير',
+							teacher_id: enseignanteIds[2],
+							age_group: '5-6',
+							room_number: 'C1',
+							schedule_id: schedule.id,
+						},
+					});
 
 	for (let i = 0; i < eleves.length; i++) {
 		const e = eleves[i];
@@ -159,8 +196,8 @@ async function main() {
 							data: {
 								full_name: e.full_name,
 								date_of_birth: new Date(`2020-0${(i % 9) + 1}-0${((i % 5) + 1)}`),
-								class_id: i < 10 ? class1.id : class2.id,
-								grade: i < 10 ? 'PS' : 'MS',
+								class_id: i < 7 ? class1.id : i < 14 ? class2.id : class3.id,
+								grade: i < 7 ? 'PS' : i < 14 ? 'MS' : 'GS',
 								schedule_id: schedule.id,
 								registration_date: new Date('2024-09-01'),
 							},

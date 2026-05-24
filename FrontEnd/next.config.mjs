@@ -8,7 +8,10 @@ const nextConfig = {
     remotePatterns: [
       { protocol: 'https', hostname: 'images.pexels.com' },
       { protocol: 'https', hostname: 'images.unsplash.com' },
-      { protocol: 'http', hostname: 'localhost' },
+      { protocol: 'http',  hostname: 'localhost' },
+      { protocol: 'https', hostname: 'brainykids.tn' },
+      { protocol: 'http',  hostname: 'brainykids.tn' },
+      { protocol: 'http',  hostname: 'brainykids.duckdns.org' },
     ],
   },
 
