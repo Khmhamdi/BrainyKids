@@ -33,7 +33,6 @@ node prisma/seed.js
 echo "✅ Seed OK"
 
 # ── 4. Démarrer NestJS en mode DEV (hot reload) ─────────────────
-# Nettoyer dist/ et le cache incremental pour forcer la recompilation
 rm -rf dist tsconfig.tsbuildinfo
 echo "▶️  Démarrage NestJS DEV..."
 exec nest start --watch

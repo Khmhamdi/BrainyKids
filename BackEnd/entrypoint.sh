@@ -34,9 +34,6 @@ fi
 echo "✅ PostgreSQL prêt"
 
 # ── 2. Synchroniser le schéma (db push) ────────────────────────
-# db push lit schema.prisma et crée/modifie les tables directement.
-# Contrairement à migrate deploy, il n'a AUCUNE dépendance aux
-# fichiers migration.sql — impossible d'avoir un P3015.
 echo ""
 echo "📦 Synchronisation du schéma (db push)..."
 
