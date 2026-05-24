@@ -55,11 +55,11 @@ jobs:
           DATABASE_URL: postgresql://testuser:testpass@localhost:5432/brainy_kids_test?schema=public
         run: npx prisma generate
 
-      - name: 🗄️ Appliquer les migrations de test
+      - name: 🗄️ Appliquer le schéma de test
         working-directory: BackEnd
         env:
           DATABASE_URL: postgresql://testuser:testpass@localhost:5432/brainy_kids_test?schema=public
-        run: npx prisma migrate deploy
+        run: npx prisma db push --accept-data-loss --skip-generate
 
       - name: ✅ Lancer les tests
         working-directory: BackEnd
@@ -183,6 +183,9 @@ jobs:
     needs: build-images
     if: github.ref == 'refs/heads/main'
     environment: production
+    permissions:
+      contents: read
+      packages: read
 
     steps:
       - name: 📥 Checkout du code
