@@ -148,8 +148,7 @@ jobs:
           context: ./BackEnd
           push: true
           tags: ${{ steps.lowercase.outputs.image_backend }}:staging
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          no-cache: true
 
       - name: 🔨 Build & Push image Frontend (staging)
         uses: docker/build-push-action@v5
@@ -158,10 +157,9 @@ jobs:
           file: ./Dockerfile.frontend
           push: true
           tags: ${{ steps.lowercase.outputs.image_frontend }}:staging
+          no-cache: true
           build-args: |
             NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
   # ════════════════════════════════════════════════════════════
   # 4. BUILD & PUSH IMAGES DOCKER PRODUCTION (sur main)
