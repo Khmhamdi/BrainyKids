@@ -22,7 +22,7 @@ services:
 
   # ─── Backend NestJS ─────────────────────────────────────────
   backend:
-    image: ghcr.io/khmhamdi/brainykids/backend:latest
+    image: ghcr.io/khmhamdi/brainykids/backend:${IMAGE_TAG:-latest}
     container_name: brainy-kids-api
     restart: unless-stopped
     environment:
@@ -43,7 +43,7 @@ services:
 
   # ─── Frontend Next.js ────────────────────────────────────────
   frontend:
-    image: ghcr.io/khmhamdi/brainykids/frontend:latest
+    image: ghcr.io/khmhamdi/brainykids/frontend:${IMAGE_TAG:-latest}
     container_name: brainy-kids-frontend
     restart: unless-stopped
     environment:
