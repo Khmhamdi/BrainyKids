@@ -135,12 +135,18 @@ jobs:
       - name: ⚡ Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: 🔠 Mettre le nom du repo en minuscules
+        id: lowercase
+        run: |
+          echo "image_backend=$(echo '${{ env.REGISTRY }}/${{ env.IMAGE_BACKEND }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+          echo "image_frontend=$(echo '${{ env.REGISTRY }}/${{ env.IMAGE_FRONTEND }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
       - name: 🔨 Build & Push image Backend (staging)
         uses: docker/build-push-action@v5
         with:
           context: ./BackEnd
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_BACKEND }}:staging
+          tags: ${{ steps.lowercase.outputs.image_backend }}:staging
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -150,7 +156,7 @@ jobs:
           context: ./FrontEnd
           file: ./Dockerfile.frontend
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_FRONTEND }}:staging
+          tags: ${{ steps.lowercase.outputs.image_frontend }}:staging
           build-args: |
             NEXT_PUBLIC_API_URL=http://${{ secrets.STAGING_HOST }}/api
           cache-from: type=gha
@@ -248,11 +254,7 @@ jobs:
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             cd /opt/brainy-kids
             git pull origin develop
-            FRONTEND_IMAGE=ghcr.io/${{ github.repository }}/frontend:staging \
-            BACKEND_IMAGE=ghcr.io/${{ github.repository }}/backend:staging \
             docker compose pull
-            FRONTEND_IMAGE=ghcr.io/${{ github.repository }}/frontend:staging \
-            BACKEND_IMAGE=ghcr.io/${{ github.repository }}/backend:staging \
             docker compose up -d --force-recreate --remove-orphans
             docker image prune -f
             echo "=== ✅ Staging déployé ==="
