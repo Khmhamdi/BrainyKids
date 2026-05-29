@@ -6,7 +6,8 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Brainy Kids Pre-School Management Dashboard",
-  description: "Next.js School Management System",
+  description: "Brainy Kids — Jardin d'enfants El Mourouj 6",
+  icons: { icon: "/LogoBK.png" },
 };
 
 export default function RootLayout({
