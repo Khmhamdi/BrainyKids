@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class AbsencesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notifications: NotificationsService,
+  ) {}
 
   async findAll(page = 1, limit = 20) {
     const skip = (page - 1) * limit;
@@ -48,7 +52,7 @@ export class AbsencesService {
   }
 
   async create(dto: any) {
-    return this.prisma.absence.create({
+    const absence = await this.prisma.absence.create({
       data: {
         student_id:          dto.student_id,
         date:                new Date(dto.date),
@@ -59,7 +63,39 @@ export class AbsencesService {
         notes:               dto.notes || null,
         recorded_by:         dto.recorded_by || null,
       },
+      include: { student: { include: { class: { include: { teacher: { include: { user: true } } } } } } },
     });
+
+    // Notifier l'enseignante de la classe et l'admin
+    await this._notifyAbsence(absence).catch(() => {});
+
+    return absence;
+  }
+
+  private async _notifyAbsence(absence: any) {
+    const student = absence.student;
+    if (!student) return;
+
+    const dateStr = new Date(absence.date).toLocaleDateString('fr-FR');
+    const title   = `Absence marquée`;
+    const message = `${student.full_name} est absent(e) le ${dateStr}`;
+    const link    = `/list/students/${student.id}`;
+
+    const recipients: string[] = [];
+
+    // Enseignante de la classe
+    const teacherUserId = student.class?.teacher?.user_id;
+    if (teacherUserId) recipients.push(teacherUserId);
+
+    // Administrateur(s)
+    const admins = await this.prisma.user.findMany({ where: { role: 'administrator' }, select: { id: true } });
+    admins.forEach(a => { if (!recipients.includes(a.id)) recipients.push(a.id); });
+
+    await Promise.all(
+      recipients.map(uid =>
+        this.notifications.upsertByLink({ user_id: uid, title, message, type: 'absence', link })
+      )
+    );
   }
 
   async update(id: string, dto: any) {

@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
-import { teachers as teachersApi, settings as settingsApi } from "@/lib/api";
+import { teachers as teachersApi, settings as settingsApi, upload as uploadApi } from "@/lib/api";
+import PhotoUpload from "@/components/PhotoUpload";
 
 const FONCTIONS_FALLBACK = [
   { value: "enseignante",       label: "Enseignante" },
@@ -60,6 +61,7 @@ const TeacherForm = ({
   const [departureDate, setDepartureDate] = useState(
     data?.departure_date ? data.departure_date.slice(0, 10) : ""
   );
+  const [photoFile, setPhotoFile]         = useState<File | null>(null);
   const [monthlySalary, setMonthlySalary] = useState(
     data?.monthly_salary !== undefined && data?.monthly_salary !== null
       ? String(data.monthly_salary)
@@ -77,9 +79,16 @@ const TeacherForm = ({
 
     setSaving(true);
     try {
+      let photoUrl: string | undefined = data?.photo_url ?? undefined;
+      if (photoFile) {
+        try { photoUrl = await uploadApi.photo(photoFile); }
+        catch (e: any) { setError(`Photo non uploadée : ${e.message}`); setSaving(false); return; }
+      }
+
       const payload: any = {
         full_name:     fullName.trim(),
         fonction,
+        ...(photoUrl !== undefined && { photo_url: photoUrl }),
         phone:         phone.trim() || null,
         qualification: qualification.trim() || null,
         hire_date:     hireDate || null,
@@ -117,6 +126,17 @@ const TeacherForm = ({
       {error && (
         <p className="text-sm text-red-600 bg-red-50 border border-red-200 p-2 rounded">{error}</p>
       )}
+
+      {/* Photo */}
+      <div className="flex flex-col gap-1">
+        <label className="text-xs font-medium text-gray-600">Photo</label>
+        <PhotoUpload
+          currentUrl={data?.photo_url}
+          previewFile={photoFile}
+          onChange={f => setPhotoFile(f)}
+          size="sm"
+        />
+      </div>
 
       {/* Fonction */}
       <div className="flex flex-col gap-1">

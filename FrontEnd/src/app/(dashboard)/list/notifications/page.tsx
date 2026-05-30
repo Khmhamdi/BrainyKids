@@ -3,6 +3,9 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { notifications as notificationsApi } from '@/lib/api';
+import { getUser } from '@/lib/useAuth';
+
+const ADMIN_ONLY_FILTERS = ['overdue', 'dossier', 'pack'];
 
 const TYPE_META: Record<string, { icon: string; label: string; color: string }> = {
   overdue: { icon: '💰', label: 'Retard de paiement', color: 'bg-red-50 text-red-700 border-red-200' },
@@ -31,6 +34,8 @@ export default function NotificationsPage() {
   const [notifs,  setNotifs]  = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter,  setFilter]  = useState('all');
+  const role = getUser()?.role ?? 'teacher';
+  const visibleFilters = FILTERS.filter(f => role === 'administrator' || !ADMIN_ONLY_FILTERS.includes(f.key));
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -70,7 +75,7 @@ export default function NotificationsPage() {
 
       {/* Filtres */}
       <div className="flex flex-wrap gap-2 mb-6">
-        {FILTERS.map(f => (
+        {visibleFilters.map(f => (
           <button key={f.key} onClick={() => setFilter(f.key)}
             className={`px-3 py-1.5 rounded-full text-xs font-medium border transition
               ${filter === f.key

@@ -66,6 +66,7 @@ export class TeachersService {
           ...(dto.departure_date && { departure_date: new Date(dto.departure_date) }),
           qualification: dto.qualification || null,
           fonction: 'enseignante',
+          ...(dto.photo_url !== undefined && { photo_url: dto.photo_url || null }),
           ...(dto.monthly_salary !== undefined && dto.monthly_salary !== '' && {
             monthly_salary: parseFloat(dto.monthly_salary),
           }),
@@ -80,6 +81,7 @@ export class TeachersService {
           ...(dto.departure_date && { departure_date: new Date(dto.departure_date) }),
           qualification: dto.qualification || null,
           fonction: dto.fonction,
+          ...(dto.photo_url !== undefined && { photo_url: dto.photo_url || null }),
           ...(dto.monthly_salary !== undefined && dto.monthly_salary !== '' && {
             monthly_salary: parseFloat(dto.monthly_salary),
           }),
@@ -129,6 +131,7 @@ export class TeachersService {
         ...(dto.departure_date !== undefined && {
           departure_date: dto.departure_date ? new Date(dto.departure_date) : null,
         }),
+        ...(dto.photo_url !== undefined && { photo_url: dto.photo_url || null }),
         ...(dto.monthly_salary !== undefined && {
           monthly_salary: dto.monthly_salary !== '' && dto.monthly_salary !== null
             ? parseFloat(dto.monthly_salary)

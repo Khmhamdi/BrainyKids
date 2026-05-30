@@ -3,6 +3,14 @@ const nextConfig = {
   // Nécessaire pour le Dockerfile multi-stage
   output: 'standalone',
 
+  // En dev (sans nginx), proxie /uploads/ vers le backend directement
+  async rewrites() {
+    const apiBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api').replace('/api', '');
+    return [
+      { source: '/uploads/:path*', destination: `${apiBase}/uploads/:path*` },
+    ];
+  },
+
   // Images externes autorisées
   images: {
     remotePatterns: [

@@ -23,9 +23,12 @@ export class NotificationsService {
     return this.prisma.notification.create({ data: dto });
   }
 
-  async findByUser(userId: string) {
+  async findByUser(userId: string, excludeTypes: string[] = []) {
     return this.prisma.notification.findMany({
-      where: { user_id: userId },
+      where: {
+        user_id: userId,
+        ...(excludeTypes.length > 0 && { type: { notIn: excludeTypes } }),
+      },
       orderBy: { created_at: 'desc' },
       take: 50,
     });
@@ -39,7 +42,13 @@ export class NotificationsService {
     return this.prisma.notification.updateMany({ where: { user_id: userId, read: false }, data: { read: true } });
   }
 
-  async countUnread(userId: string) {
-    return this.prisma.notification.count({ where: { user_id: userId, read: false } });
+  async countUnread(userId: string, excludeTypes: string[] = []) {
+    return this.prisma.notification.count({
+      where: {
+        user_id: userId,
+        read: false,
+        ...(excludeTypes.length > 0 && { type: { notIn: excludeTypes } }),
+      },
+    });
   }
 }

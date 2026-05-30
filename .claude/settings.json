@@ -1,7 +1,15 @@
 {
   "permissions": {
     "allow": [
-      "Bash(docker build *)"
+      "Bash(docker build *)",
+      "Bash(ls src/app/favicon*)",
+      "Bash(ls public/favicon*)",
+      "Bash(del \"d:\\\\AppKidsgartenManagement\\\\brainy-kids-app\\\\FrontEnd\\\\src\\\\app\\\\favicon.ico\")",
+      "Bash(Get-ChildItem -Path \"d:\\\\AppKidsgartenManagement\\\\brainy-kids-app\\\\FrontEnd\\\\src\" -Recurse -Directory)",
+      "Bash(Select-Object FullName)",
+      "Bash(Sort-Object FullName)",
+      "Bash(grep -E \"\\\\.\\(tsx|ts|jsx|js\\)$\")",
+      "Bash(xargs ls -la)"
     ]
   }
 }

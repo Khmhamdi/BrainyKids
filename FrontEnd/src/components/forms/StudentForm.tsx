@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { students as studentsApi, classes as classesApi, parents as parentsApi, upload as uploadApi, schedules as schedulesApi } from "@/lib/api";
+import PhotoUpload from "@/components/PhotoUpload";
 
 const calculateAge = (dob: string): number => {
   if (!dob) return 0;
@@ -306,14 +307,12 @@ const StudentForm = ({ type, data, onSuccess }: {
 
       {/* Photo */}
       <div className="flex flex-col gap-1">
-        <label className={labelCls}>Charger photo</label>
-        <div className="flex items-center gap-2">
-          <input readOnly value={photoFile?.name || ""} className={`${inputCls} flex-1`} placeholder="Aucun fichier sélectionné" />
-          <label className="cursor-pointer px-3 py-2 border border-gray-300 rounded-md text-sm bg-gray-50 hover:bg-gray-100">
-            ...
-            <input type="file" accept="image/*" className="hidden" onChange={e => setPhotoFile(e.target.files?.[0] || null)} />
-          </label>
-        </div>
+        <label className={labelCls}>Photo de l'enfant</label>
+        <PhotoUpload
+          currentUrl={data?.photo_url}
+          previewFile={photoFile}
+          onChange={f => setPhotoFile(f)}
+        />
       </div>
 
       {/* Année scolaire */}

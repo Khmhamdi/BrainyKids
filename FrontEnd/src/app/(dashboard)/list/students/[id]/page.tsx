@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { students as studentsApi, packs as packsApi, packsExt, absences as absencesApi, notes as notesApi, schedules as schedulesApi } from "@/lib/api";
+import { getMediaUrl } from "@/lib/media";
 import { getUser } from "@/lib/useAuth";
 import PackForm from "@/components/forms/PackForm";
 import StudentForm from "@/components/forms/StudentForm";
@@ -265,7 +266,7 @@ const SingleStudentPage = () => {
           <div className="relative shrink-0 cursor-pointer" onClick={() => student.photo_url && setPhotoBig(true)}>
             {student.photo_url ? (
               <img
-                src={`http://localhost${student.photo_url}`}
+                src={getMediaUrl(student.photo_url)!}
                 alt={student.full_name}
                 className="w-24 h-24 rounded-full object-cover border-4 border-white/40 shadow-lg hover:opacity-90 transition"
               />
@@ -969,7 +970,7 @@ const SingleStudentPage = () => {
       {/* Photo en grand */}
       {photoBig && student.photo_url && (
         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center" onClick={() => setPhotoBig(false)}>
-          <img src={`http://localhost${student.photo_url}`} alt={student.full_name}
+          <img src={getMediaUrl(student.photo_url)!} alt={student.full_name}
             className="max-w-sm max-h-[80vh] rounded-2xl shadow-2xl object-cover" />
         </div>
       )}

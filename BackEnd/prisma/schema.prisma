@@ -30,6 +30,7 @@ model Teacher {
   departure_date  DateTime?
   qualification   String?
   fonction        String               @default("enseignante")
+  photo_url       String?
   monthly_salary  Decimal?             @db.Decimal(10, 2)
   user            User?                @relation(fields: [user_id], references: [id])
   classes         Class[]

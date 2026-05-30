@@ -40,10 +40,10 @@ const menuItems = [
       // ── Tableau de bord ──────────────────────────────────────
       { icon: '/home.png',         label: 'Accueil',      href: 'HOME',             visible: ['administrator', 'teacher', 'parent', 'student'] },
       // ── Personnes ────────────────────────────────────────────
-      { icon: '/student.png',      label: 'Enfants',      href: '/list/students',   visible: ['administrator', 'teacher'] },
+      { icon: '/student.png',      label: 'Enfants',      href: '/list/students',   visible: ['administrator'] },
       { icon: '/teacher.png',      label: 'Personnel',    href: '/list/teachers',   visible: ['administrator'] },
       { icon: '/parent.png',       label: 'Parents',      href: '/list/parents',    visible: ['administrator'] },
-      { icon: '/class.png',        label: 'Classes',      href: '/list/classes',    visible: ['administrator'] },
+      { icon: '/class.png',        label: 'Classes',      href: '/list/classes',    visible: ['administrator', 'teacher'] },
       // ── Opérations quotidiennes ──────────────────────────────
       { icon: '/attendance.png',   label: 'Absences',     href: '/list/absences',   visible: ['administrator', 'teacher'] },
       { icon: '/finance.png',      label: 'Paiements',    href: '/list/paiements',  visible: ['administrator'] },
