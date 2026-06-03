@@ -53,11 +53,6 @@ const menuItems = [
       { icon: '/calendar.png',     label: 'Événements',   href: '/list/evenements', visible: ['administrator', 'teacher', 'parent', 'student'] },
       { icon: '/announcement.png', label: 'Annonces',     href: '/list/annonces',   visible: ['administrator', 'teacher', 'parent', 'student'] },
       { icon: '/message.png',      label: 'Messages',     href: '/list/messages',   visible: ['administrator', 'parent'] },
-      // ── Académique ───────────────────────────────────────────
-      { icon: '/subject.png',      label: 'Matières',     href: '/list/matieres',   visible: ['administrator'] },
-      { icon: '/lesson.png',       label: 'Leçons',       href: '/list/lessons',    visible: ['administrator', 'teacher'] },
-      { icon: '/exam.png',         label: 'Examens',      href: '/list/examens',    visible: ['administrator', 'teacher', 'parent', 'student'] },
-      { icon: '/assignment.png',   label: 'Tâches',       href: '/list/taches',     visible: ['administrator', 'teacher', 'parent', 'student'] },
       { icon: '/result.png',       label: 'Résultats',    href: '/list/resultats',  visible: ['administrator', 'teacher', 'parent', 'student'] },
     ],
   },

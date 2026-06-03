@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/api';
 import { getDashboardPath } from '@/lib/useAuth';
@@ -39,7 +40,12 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-BKprimary to-blue-700 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
+        {/* Bouton retour accueil */}
+        <Link href="/" className="absolute top-4 left-4 text-xs text-gray-400 hover:text-BKprimary flex items-center gap-1 transition-colors">
+          ← Accueil
+        </Link>
+
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
           <Image src="/LogoBK.png" alt="Brainy Kids" width={80} height={80} />
@@ -105,16 +111,6 @@ export default function LoginPage() {
           </button>
         </form>
 
-        {/* Comptes de démo */}
-        <div className="mt-6 p-4 bg-BKskyLight rounded-lg">
-          <p className="text-xs font-semibold text-gray-600 mb-2">Comptes de démonstration :</p>
-          <div className="grid grid-cols-2 gap-1 text-xs text-gray-500">
-            <span>👤 admin / admin123</span>
-            <span>👩‍🏫 enseignante1 / enseignante123</span>
-            <span>👨‍👩‍👧 parent1 / parent1pass</span>
-            <span>👑 directrice / directrice123</span>
-          </div>
-        </div>
       </div>
     </div>
   );

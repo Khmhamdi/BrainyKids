@@ -28,7 +28,7 @@ export function logout(): void {
   document.cookie = 'bk_token=; path=/; max-age=0; SameSite=Strict';
   document.cookie = 'bk_role=; path=/; max-age=0; SameSite=Strict';
   // replace() remplace l'entrée historique → le bouton précédent ne revient pas
-  window.location.replace('/sign-in');
+  window.location.replace('/');
 }
 
 export function getDashboardPath(role: string): string {

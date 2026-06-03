@@ -388,14 +388,18 @@ model Notification {
 
 model PreRegistration {
   id               String    @id @default(uuid())
+  type             String    @default("scolarite")   // scolarite | club_ete
   child_full_name  String
   date_of_birth    DateTime
   gender           String    @default("M")
-  desired_class    String
-  school_year      String
+  desired_class    String    @default("")
+  school_year      String    @default("")
+  is_internal      Boolean?                          // clubs d'été: interne ou externe
   parent_full_name String
   parent_phone     String
-  parent_email     String
+  parent_email     String?
+  parent_cin       String?                           // clubs d'été
+  parent_address   String?                           // clubs d'été
   parent_relation  String    @default("father")
   message          String?
   status           String    @default("pending")
