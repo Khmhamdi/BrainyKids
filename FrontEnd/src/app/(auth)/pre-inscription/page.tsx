@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { preRegistrations } from '@/lib/api';
+import HomeButton from '@/components/HomeButton';
 
 const CURRENT_YEAR = '2025-2026';
 const NEXT_YEAR    = '2026-2027';
@@ -73,6 +74,7 @@ export default function PreInscriptionPage() {
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
+          <div className="flex justify-center mb-4"><HomeButton /></div>
           <div className="text-5xl mb-3">🏫</div>
           <h1 className="text-3xl font-bold text-gray-800">Brainy Kids</h1>
           <p className="text-gray-500 mt-1">Demande de pré-inscription en ligne</p>

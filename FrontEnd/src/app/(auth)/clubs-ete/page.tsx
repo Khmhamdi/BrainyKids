@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { publicApi, preRegistrations } from '@/lib/api';
+import HomeButton from '@/components/HomeButton';
 
 const CLUB_ICONS: Record<string, string> = {
   "Jeux d'eau":   '💧',
@@ -72,7 +73,7 @@ export default function ClubsEtePage() {
 
         {/* Header */}
         <div className="text-center mb-8">
-          <Link href="/" className="text-sm text-orange-600 hover:underline mb-4 inline-block">← Accueil</Link>
+          <div className="flex justify-center mb-4"><HomeButton /></div>
           <div className="text-5xl mb-3">☀️</div>
           <h1 className="text-3xl font-bold text-gray-800">Clubs d'été</h1>
           <p className="text-gray-500 mt-1">Session Juillet – Août 2026 · Brainy Kids</p>

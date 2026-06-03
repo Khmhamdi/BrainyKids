@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/api';
 import { getDashboardPath } from '@/lib/useAuth';
+import HomeButton from '@/components/HomeButton';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -41,10 +42,9 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-BKprimary to-blue-700 flex items-center justify-center p-4">
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
-        {/* Bouton retour accueil */}
-        <Link href="/" className="absolute top-4 left-4 text-xs text-gray-400 hover:text-BKprimary flex items-center gap-1 transition-colors">
-          ← Accueil
-        </Link>
+        <div className="absolute top-4 left-4">
+          <HomeButton />
+        </div>
 
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
