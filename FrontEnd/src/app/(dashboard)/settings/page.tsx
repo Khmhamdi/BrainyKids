@@ -446,6 +446,19 @@ const SettingsPage = () => {
           <p className="text-xs text-gray-400 mt-0.5">Gérez les listes de valeurs utilisées dans l'application</p>
         </div>
 
+        {/* Lien vers années scolaires */}
+        <a href="/settings/school-years"
+          className="mb-6 flex items-center gap-3 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-xl p-4 hover:shadow-md transition group">
+          <span className="text-3xl">📅</span>
+          <div className="flex-1">
+            <h3 className="font-semibold text-gray-800 text-sm group-hover:text-blue-600 transition">Années scolaires</h3>
+            <p className="text-xs text-gray-500 mt-0.5">Gérer les années scolaires et définir l'année courante</p>
+          </div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400 group-hover:text-blue-600 transition">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </a>
+
         {/* Onglets */}
         <div className="flex gap-1 mb-6 bg-gray-100 p-1 rounded-xl w-fit flex-wrap">
           {TABS.map(t => (

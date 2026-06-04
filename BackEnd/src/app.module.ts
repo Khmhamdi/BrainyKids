@@ -19,6 +19,7 @@ import { ClubsModule } from './clubs/clubs.module';
 import { SettingsModule } from './settings/settings.module';
 import { SchedulesModule } from './schedules/schedules.module';
 import { PreRegistrationsModule } from './pre-registrations/pre-registrations.module';
+import { SchoolYearsModule } from './school-years/school-years.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { PreRegistrationsModule } from './pre-registrations/pre-registrations.mo
     SettingsModule,
     SchedulesModule,
     PreRegistrationsModule,
+    SchoolYearsModule,
   ],
 })
 export class AppModule {}

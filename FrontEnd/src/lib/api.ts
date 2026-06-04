@@ -291,3 +291,13 @@ export const settings = {
   updateLookup: (id: string, data: any) => apiFetch<any>(`/settings/lookups/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteLookup: (id: string)            => apiFetch<any>(`/settings/lookups/${id}`, { method: 'DELETE' }),
 };
+
+// ─── Années scolaires ─────────────────────────────────────────
+export const schoolYears = {
+  list:       ()                      => apiFetch<any[]>('/school-years'),
+  getCurrent: ()                      => apiFetch<any>('/school-years/current'),
+  create:     (data: any)             => apiFetch<any>('/school-years', { method: 'POST', body: JSON.stringify(data) }),
+  update:     (id: string, data: any) => apiFetch<any>(`/school-years/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  setCurrent: (id: string)            => apiFetch<any>(`/school-years/${id}/set-current`, { method: 'PUT' }),
+  delete:     (id: string)            => apiFetch<any>(`/school-years/${id}`, { method: 'DELETE' }),
+};

@@ -408,3 +408,14 @@ model PreRegistration {
   processed_at     DateTime?
   processed_by     String?
 }
+
+model SchoolYear {
+  id          String   @id @default(uuid())
+  label       String   @unique  // "2026-2027"
+  start_date  DateTime // 2026-09-01
+  end_date    DateTime // 2027-06-30
+  is_current  Boolean  @default(false)
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+}
