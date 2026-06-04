@@ -17,8 +17,8 @@ export class PreRegistrationsController {
   // ── Admin — authentification requise ─────────────────────────
   @Get()
   @ApiBearerAuth() @UseGuards(JwtAuthGuard)
-  findAll(@Query('status') status?: string) {
-    return this.service.findAll(status);
+  findAll(@Query('status') status?: string, @Query('type') type?: string) {
+    return this.service.findAll(status, type);
   }
 
   @Get('stats')
@@ -31,6 +31,12 @@ export class PreRegistrationsController {
   @ApiBearerAuth() @UseGuards(JwtAuthGuard)
   approve(@Param('id') id: string, @Request() req: any) {
     return this.service.approve(id, req.user?.username || 'admin');
+  }
+
+  @Put(':id/approve-scolarite')
+  @ApiBearerAuth() @UseGuards(JwtAuthGuard)
+  approveScolarite(@Param('id') id: string, @Body() dto: any, @Request() req: any) {
+    return this.service.approveScolarite(id, req.user?.username || 'admin', dto);
   }
 
   @Put(':id/reject')

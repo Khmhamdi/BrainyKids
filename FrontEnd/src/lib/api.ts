@@ -263,9 +263,17 @@ export const preRegistrations = {
       if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message || 'Erreur'); }
       return res.json();
     }),
-  list:    (status?: string) => apiFetch<any[]>(`/pre-registrations${status ? `?status=${status}` : ''}`),
+  list:    (status?: string, type?: string) => {
+    const params = new URLSearchParams();
+    if (status && status !== 'all') params.set('status', status);
+    if (type   && type   !== 'all') params.set('type',   type);
+    const q = params.toString();
+    return apiFetch<any[]>(`/pre-registrations${q ? `?${q}` : ''}`);
+  },
   stats:   ()                => apiFetch<any>('/pre-registrations/stats'),
   approve: (id: string)      => apiFetch<any>(`/pre-registrations/${id}/approve`, { method: 'PUT' }),
+  approveScolarite: (id: string, dto: any) =>
+    apiFetch<any>(`/pre-registrations/${id}/approve-scolarite`, { method: 'PUT', body: JSON.stringify(dto) }),
   reject:  (id: string, reason: string) =>
     apiFetch<any>(`/pre-registrations/${id}/reject`, { method: 'PUT', body: JSON.stringify({ reason }) }),
   remove:  (id: string)      => apiFetch<any>(`/pre-registrations/${id}`, { method: 'DELETE' }),

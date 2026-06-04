@@ -1,4 +1,4 @@
-{
+{"model": "claude-sonnet-4-5",
   "permissions": {
     "allow": [
       "Bash(docker build *)",

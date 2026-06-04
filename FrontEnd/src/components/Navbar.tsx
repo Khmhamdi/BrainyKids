@@ -47,7 +47,7 @@ const Navbar = () => {
 
   useEffect(() => {
     refreshCount();
-    const id = setInterval(refreshCount, 60_000);
+    const id = setInterval(refreshCount, 15_000);
     return () => clearInterval(id);
   }, [refreshCount]);
 
