@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
 import AuthGuard from "@/components/AuthGuard";
-import { settings as settingsApi, auth as authApi } from "@/lib/api";
+import { settings as settingsApi, auth as authApi, schoolYears as schoolYearsApi } from "@/lib/api";
 import { getUser, logout } from "@/lib/useAuth";
 
 // ── Paramètres de l'établissement (localStorage) ─────────────
@@ -267,6 +267,7 @@ const TABS = [
   { key: "age_group",     label: "👶 Groupes d'âge"  },
   { key: "fonction",      label: "👔 Fonctions"       },
   { key: "etablissement", label: "⚙️ Établissement"  },
+  { key: "annees",        label: "📅 Années scolaires" },
 ];
 
 // ── Composant hors du parent (éviter bug focus) ───────────────
@@ -358,6 +359,228 @@ const LookupRow = ({ item, onSave, onDelete }: {
   );
 };
 
+// ── Panel Années scolaires ────────────────────────────────────
+const SchoolYearsPanel = () => {
+  const [years, setYears] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [editingYear, setEditingYear] = useState<any | null>(null);
+
+  const iCls = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400';
+  const lCls = 'text-xs font-medium text-gray-600 mb-1 block';
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await schoolYearsApi.list();
+      setYears(data);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const handleSetCurrent = async (id: string) => {
+    if (!confirm('Définir cette année comme année courante ?')) return;
+    await schoolYearsApi.setCurrent(id);
+    load();
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Supprimer cette année scolaire ?')) return;
+    try {
+      await schoolYearsApi.delete(id);
+      load();
+    } catch (e: any) {
+      alert(e.message || 'Erreur lors de la suppression');
+    }
+  };
+
+  const handleEdit = (year: any) => {
+    setEditingYear(year);
+    setShowModal(true);
+  };
+
+  const handleNew = () => {
+    setEditingYear(null);
+    setShowModal(true);
+  };
+
+  const handleSave = async (data: any) => {
+    try {
+      if (editingYear) {
+        await schoolYearsApi.update(editingYear.id, data);
+      } else {
+        await schoolYearsApi.create(data);
+      }
+      setShowModal(false);
+      setEditingYear(null);
+      load();
+    } catch (e: any) {
+      throw e;
+    }
+  };
+
+  return (
+    <div className="max-w-4xl">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <p className="text-sm font-semibold text-gray-700">Années scolaires</p>
+          <p className="text-xs text-gray-400 mt-0.5">Gérer les années scolaires et définir l'année courante</p>
+        </div>
+        <button onClick={handleNew}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition">
+          + Nouvelle année
+        </button>
+      </div>
+
+      {loading ? (
+        <p className="text-center py-8 text-gray-400 text-sm">Chargement…</p>
+      ) : years.length === 0 ? (
+        <div className="text-center py-10 text-gray-400 text-sm">
+          <p className="text-3xl mb-2">📅</p>
+          <p>Aucune année scolaire</p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border rounded-lg">
+            <thead className="bg-gray-50 border-b">
+              <tr>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600">Année</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600">Début</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600">Fin</th>
+                <th className="text-center px-4 py-3 text-xs font-semibold text-gray-600">Statut</th>
+                <th className="text-right px-4 py-3 text-xs font-semibold text-gray-600">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {years.map(y => (
+                <tr key={y.id} className="hover:bg-gray-50">
+                  <td className="px-4 py-3">
+                    <span className="font-semibold text-gray-800">{y.label}</span>
+                    {y.is_current && (
+                      <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700 border border-green-200 font-medium">
+                        ✓ Courante
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-gray-600">
+                    {new Date(y.start_date).toLocaleDateString('fr-TN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                  </td>
+                  <td className="px-4 py-3 text-gray-600">
+                    {new Date(y.end_date).toLocaleDateString('fr-TN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    {y.is_active ? (
+                      <span className="text-xs px-2 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-200">Active</span>
+                    ) : (
+                      <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-500 border border-gray-200">Inactive</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <div className="flex gap-2 justify-end">
+                      {!y.is_current && (
+                        <button onClick={() => handleSetCurrent(y.id)}
+                          className="text-xs px-3 py-1.5 rounded-lg bg-green-600 text-white hover:bg-green-700">
+                          Définir courante
+                        </button>
+                      )}
+                      <button onClick={() => handleEdit(y)}
+                        className="text-xs px-3 py-1.5 rounded-lg border border-gray-300 hover:bg-gray-50">
+                        Modifier
+                      </button>
+                      <button onClick={() => handleDelete(y.id)}
+                        className="text-xs px-3 py-1.5 rounded-lg border border-red-300 text-red-600 hover:bg-red-50">
+                        Supprimer
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <YearModal year={editingYear} onClose={() => { setShowModal(false); setEditingYear(null); }} onSave={handleSave} />
+        </div>
+      )}
+    </div>
+  );
+};
+
+const YearModal = ({ year, onClose, onSave }: { year?: any; onClose: () => void; onSave: (data: any) => Promise<void> }) => {
+  const [label, setLabel] = useState(year?.label || '');
+  const [startDate, setStartDate] = useState(year?.start_date ? year.start_date.split('T')[0] : '');
+  const [endDate, setEndDate] = useState(year?.end_date ? year.end_date.split('T')[0] : '');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  const iCls = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400';
+  const lCls = 'text-xs font-medium text-gray-600 mb-1 block';
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!label.trim() || !startDate || !endDate) {
+      setError('Tous les champs sont obligatoires');
+      return;
+    }
+    setSaving(true);
+    setError('');
+    try {
+      await onSave({ label, start_date: startDate, end_date: endDate });
+    } catch (e: any) {
+      setError(e.message || 'Erreur lors de l\'enregistrement');
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+      <div className="bg-gradient-to-r from-blue-600 to-cyan-500 rounded-t-2xl px-6 py-4">
+        <h3 className="text-white font-bold text-lg">
+          {year ? 'Modifier l\'année scolaire' : 'Nouvelle année scolaire'}
+        </h3>
+      </div>
+      <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4">
+        {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>}
+
+        <div>
+          <label className={lCls}>Libellé (ex: 2026-2027)</label>
+          <input type="text" value={label} onChange={e => setLabel(e.target.value)}
+            className={iCls} placeholder="2026-2027" />
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className={lCls}>Date de début</label>
+            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className={iCls} />
+          </div>
+          <div>
+            <label className={lCls}>Date de fin</label>
+            <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className={iCls} />
+          </div>
+        </div>
+
+        <div className="flex gap-3 pt-2">
+          <button type="button" onClick={onClose}
+            className="flex-1 border border-gray-300 text-gray-600 py-2.5 rounded-xl text-sm hover:bg-gray-50">
+            Annuler
+          </button>
+          <button type="submit" disabled={saving}
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl text-sm disabled:opacity-50">
+            {saving ? 'Enregistrement...' : year ? 'Modifier' : 'Créer'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
 // ── Formulaire ajout ──────────────────────────────────────────
 const AddLookupForm = ({ category, codeHint, onAdded }: {
   category: string; codeHint: string; onAdded: () => void;
@@ -446,19 +669,6 @@ const SettingsPage = () => {
           <p className="text-xs text-gray-400 mt-0.5">Gérez les listes de valeurs utilisées dans l'application</p>
         </div>
 
-        {/* Lien vers années scolaires */}
-        <a href="/settings/school-years"
-          className="mb-6 flex items-center gap-3 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-xl p-4 hover:shadow-md transition group">
-          <span className="text-3xl">📅</span>
-          <div className="flex-1">
-            <h3 className="font-semibold text-gray-800 text-sm group-hover:text-blue-600 transition">Années scolaires</h3>
-            <p className="text-xs text-gray-500 mt-0.5">Gérer les années scolaires et définir l'année courante</p>
-          </div>
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400 group-hover:text-blue-600 transition">
-            <polyline points="9 18 15 12 9 6"/>
-          </svg>
-        </a>
-
         {/* Onglets */}
         <div className="flex gap-1 mb-6 bg-gray-100 p-1 rounded-xl w-fit flex-wrap">
           {TABS.map(t => (
@@ -469,7 +679,9 @@ const SettingsPage = () => {
           ))}
         </div>
 
-        {activeTab === "etablissement" ? (
+        {activeTab === "annees" ? (
+          <SchoolYearsPanel />
+        ) : activeTab === "etablissement" ? (
           <>
             <div className="mb-4">
               <div className="flex items-center gap-2 mb-1">
