@@ -70,13 +70,15 @@ export class PreRegistrationsService {
     // 1. Créer l'élève
     const student = await this.prisma.student.create({
       data: {
-        full_name:      reg.child_full_name,
-        date_of_birth:  reg.date_of_birth,
-        gender:         dto.gender ?? reg.gender ?? 'M',
-        class_id:       dto.class_id,
-        transport_mode: dto.transport_mode ?? 'parent',
-        school_year:    reg.school_year || new Date().getFullYear() + '-' + (new Date().getFullYear() + 1),
-        archived:       false,
+        full_name:         reg.child_full_name,
+        date_of_birth:     reg.date_of_birth,
+        gender:            dto.gender ?? reg.gender ?? 'M',
+        class_id:          dto.class_id,
+        grade:             reg.desired_class || 'PS',
+        schedule_id:       dto.schedule_id || null,
+        registration_date: new Date(),
+        transport_mode:    dto.transport_mode ?? 'parent',
+        archived:          false,
       },
     });
 
@@ -84,12 +86,13 @@ export class PreRegistrationsService {
     const now = new Date();
     await this.prisma.studentPack.create({
       data: {
-        student_id:    student.id,
-        school_year:   reg.school_year || `${now.getFullYear()}-${now.getFullYear() + 1}`,
-        pack_type:     dto.pack_type,
-        monthly_fee:   dto.monthly_fee,
-        start_month:   now.getMonth() + 1,
-        start_year:    now.getFullYear(),
+        student_id:         student.id,
+        school_year:        reg.school_year || `${now.getFullYear()}-${now.getFullYear() + 1}`,
+        scolarite_amount:   dto.monthly_fee,
+        tarif_base:         dto.monthly_fee,
+        regime:             'journee_complete',
+        start_month:        now.getMonth() + 1,
+        end_month:          6,
       },
     });
 
