@@ -148,7 +148,8 @@ jobs:
           context: ./BackEnd
           push: true
           tags: ${{ steps.lowercase.outputs.image_backend }}:staging
-          no-cache: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: 🔨 Build & Push image Frontend (staging)
         uses: docker/build-push-action@v5
@@ -157,7 +158,8 @@ jobs:
           file: ./Dockerfile.frontend
           push: true
           tags: ${{ steps.lowercase.outputs.image_frontend }}:staging
-          no-cache: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           build-args: |
             NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
 
@@ -254,7 +256,7 @@ jobs:
             cd /opt/brainy-kids
             git pull origin develop
             docker compose pull
-            docker compose up -d --force-recreate --remove-orphans
+            docker compose up -d --remove-orphans
             docker image prune -f
             echo "=== ✅ Staging déployé ==="
 
@@ -303,7 +305,7 @@ jobs:
             cd /opt/brainy-kids
             git pull origin main
             docker compose pull
-            docker compose up -d --force-recreate --remove-orphans
+            docker compose up -d --remove-orphans
             docker image prune -f
             echo "=== ✅ Déploiement terminé ==="
 

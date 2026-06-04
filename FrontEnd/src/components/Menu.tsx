@@ -50,6 +50,7 @@ const menuItems = [
       { icon: '/lesson.png',       label: 'Clubs',             href: '/list/clubs',               visible: ['administrator'] },
       { icon: '/lesson.png',       label: 'Inscriptions été',  href: '/list/clubs-ete',           visible: ['administrator'] },
       { icon: '/assignment.png',   label: 'Pré-inscriptions',  href: '/list/pre-inscriptions',    visible: ['administrator'] },
+      { icon: '/result.png',       label: 'Résultats',         href: '/list/resultats',           visible: ['administrator', 'teacher', 'parent', 'student'] },
     ],
   },
   {
@@ -64,7 +65,6 @@ const menuItems = [
   {
     title: 'AUTRE',
     items: [
-      { icon: '/result.png',  label: 'Résultats',    href: '/list/resultats', visible: ['administrator', 'teacher', 'parent', 'student'] },
       { icon: '/profile.png', label: 'Profil',       href: '/profile',        visible: ['administrator', 'teacher', 'parent', 'student'] },
       { icon: '/setting.png', label: 'Paramètres',   href: '/settings',       visible: ['administrator', 'teacher', 'parent', 'student'] },
       { icon: '/logout.png',  label: 'Déconnexion',  href: 'LOGOUT',          visible: ['administrator', 'teacher', 'parent', 'student'] },
