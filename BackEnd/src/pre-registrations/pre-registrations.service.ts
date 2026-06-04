@@ -109,8 +109,56 @@ export class PreRegistrationsService {
     return { student_id: student.id };
   }
 
-  // ── Approbation club d'été : marque approuvée uniquement ───────
+  // ── Approbation club d'été : crée ExternalStudent + SummerPack ─
   async approveClubEte(id: string, adminName: string) {
+    const reg = await this.prisma.preRegistration.findUnique({ where: { id } });
+    if (!reg) throw new NotFoundException();
+
+    const now = new Date();
+    const month = now.getMonth() + 1; // mois actuel (1-12)
+    const year = now.getFullYear();
+
+    let studentId: string | null = null;
+    let externalStudentId: string | null = null;
+
+    // Si externe : créer ExternalStudent
+    if (reg.is_internal === false) {
+      const external = await this.prisma.externalStudent.create({
+        data: {
+          full_name:     reg.child_full_name,
+          date_of_birth: reg.date_of_birth,
+          gender:        reg.gender ?? 'M',
+          parent_name:   reg.parent_full_name,
+          parent_phone:  reg.parent_phone,
+          parent_email:  reg.parent_email,
+          address:       reg.parent_address,
+        },
+      });
+      externalStudentId = external.id;
+    } else {
+      // Si interne : chercher le student par nom (approximatif)
+      // Note : si plusieurs homonymes, prendre le premier
+      const student = await this.prisma.student.findFirst({
+        where: { full_name: { contains: reg.child_full_name, mode: 'insensitive' } },
+      });
+      if (student) studentId = student.id;
+    }
+
+    // Créer un SummerPack basique pour que l'enfant apparaisse dans la liste
+    await this.prisma.summerPack.create({
+      data: {
+        student_id:          studentId,
+        external_student_id: externalStudentId,
+        month,
+        year,
+        pack_amount:         0,
+        clubs_json:          [],
+        total_amount:        0,
+        paid:                false,
+      },
+    });
+
+    // Marquer comme approuvée
     return this.prisma.preRegistration.update({
       where: { id },
       data: { status: 'approved', processed_at: new Date(), processed_by: adminName },

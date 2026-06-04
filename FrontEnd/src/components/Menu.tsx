@@ -38,30 +38,36 @@ const menuItems = [
     title: 'MENU',
     items: [
       // ── Tableau de bord ──────────────────────────────────────
-      { icon: '/home.png',         label: 'Accueil',      href: 'HOME',             visible: ['administrator', 'teacher', 'parent', 'student'] },
-      // ── Personnes ────────────────────────────────────────────
-      { icon: '/student.png',      label: 'Enfants',      href: '/list/students',   visible: ['administrator'] },
-      { icon: '/teacher.png',      label: 'Personnel',    href: '/list/teachers',   visible: ['administrator'] },
-      { icon: '/parent.png',       label: 'Parents',      href: '/list/parents',    visible: ['administrator'] },
-      { icon: '/class.png',        label: 'Classes',      href: '/list/classes',    visible: ['administrator', 'teacher'] },
-      // ── Opérations quotidiennes ──────────────────────────────
-      { icon: '/attendance.png',   label: 'Absences',     href: '/list/absences',   visible: ['administrator', 'teacher'] },
-      { icon: '/finance.png',      label: 'Paiements',    href: '/list/paiements',  visible: ['administrator'] },
-      { icon: '/lesson.png',       label: "Clubs",            href: '/list/clubs',      visible: ['administrator'] },
-      { icon: '/lesson.png',       label: "Inscriptions été", href: '/list/clubs-ete',  visible: ['administrator'] },
-      // ── Communication ────────────────────────────────────────
-      { icon: '/calendar.png',     label: 'Événements',   href: '/list/evenements', visible: ['administrator', 'teacher', 'parent', 'student'] },
-      { icon: '/announcement.png', label: 'Annonces',     href: '/list/annonces',   visible: ['administrator', 'teacher', 'parent', 'student'] },
-      { icon: '/message.png',      label: 'Messages',     href: '/list/messages',   visible: ['administrator', 'parent'] },
-      { icon: '/result.png',       label: 'Résultats',    href: '/list/resultats',  visible: ['administrator', 'teacher', 'parent', 'student'] },
+      { icon: '/home.png',         label: 'Accueil',           href: 'HOME',                      visible: ['administrator', 'teacher', 'parent', 'student'] },
+      // ── Gestion des personnes ────────────────────────────────
+      { icon: '/student.png',      label: 'Enfants',           href: '/list/students',            visible: ['administrator'] },
+      { icon: '/teacher.png',      label: 'Personnel',         href: '/list/teachers',            visible: ['administrator'] },
+      { icon: '/parent.png',       label: 'Parents',           href: '/list/parents',             visible: ['administrator'] },
+      { icon: '/class.png',        label: 'Classes',           href: '/list/classes',             visible: ['administrator', 'teacher'] },
+      // ── Opérations & inscriptions ────────────────────────────
+      { icon: '/attendance.png',   label: 'Absences',          href: '/list/absences',            visible: ['administrator', 'teacher'] },
+      { icon: '/finance.png',      label: 'Paiements',         href: '/list/paiements',           visible: ['administrator'] },
+      { icon: '/lesson.png',       label: 'Clubs',             href: '/list/clubs',               visible: ['administrator'] },
+      { icon: '/lesson.png',       label: 'Inscriptions été',  href: '/list/clubs-ete',           visible: ['administrator'] },
+      { icon: '/assignment.png',   label: 'Pré-inscriptions',  href: '/list/pre-inscriptions',    visible: ['administrator'] },
+    ],
+  },
+  {
+    title: 'COMMUNICATION',
+    items: [
+      { icon: '/calendar.png',     label: 'Événements',   href: '/list/evenements',  visible: ['administrator', 'teacher', 'parent', 'student'] },
+      { icon: '/announcement.png', label: 'Annonces',     href: '/list/annonces',    visible: ['administrator', 'teacher', 'parent', 'student'] },
+      { icon: '/message.png',      label: 'Messages',     href: '/list/messages',    visible: ['administrator', 'parent'] },
+      { icon: '/announcement.png', label: 'Notifications',href: '/notifications',    visible: ['administrator', 'teacher'] },
     ],
   },
   {
     title: 'AUTRE',
     items: [
-      { icon: '/profile.png', label: 'Profil',       href: '/profile',   visible: ['administrator', 'teacher', 'parent', 'student'] },
-      { icon: '/setting.png', label: 'Paramètres',   href: '/settings',  visible: ['administrator', 'teacher', 'parent', 'student'] },
-      { icon: '/logout.png',  label: 'Déconnexion',  href: 'LOGOUT',     visible: ['administrator', 'teacher', 'parent', 'student'] },
+      { icon: '/result.png',  label: 'Résultats',    href: '/list/resultats', visible: ['administrator', 'teacher', 'parent', 'student'] },
+      { icon: '/profile.png', label: 'Profil',       href: '/profile',        visible: ['administrator', 'teacher', 'parent', 'student'] },
+      { icon: '/setting.png', label: 'Paramètres',   href: '/settings',       visible: ['administrator', 'teacher', 'parent', 'student'] },
+      { icon: '/logout.png',  label: 'Déconnexion',  href: 'LOGOUT',          visible: ['administrator', 'teacher', 'parent', 'student'] },
     ],
   },
 ];

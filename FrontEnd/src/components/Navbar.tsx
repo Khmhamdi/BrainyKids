@@ -37,7 +37,7 @@ const Navbar = () => {
     setUser(getUser());
   }, []);
 
-  // Compteur non-lus — refresh toutes les 60 s
+  // Compteur non-lus — refresh toutes les 5 s
   const refreshCount = useCallback(async () => {
     try {
       const count = await notificationsApi.unreadCount();
@@ -47,7 +47,7 @@ const Navbar = () => {
 
   useEffect(() => {
     refreshCount();
-    const id = setInterval(refreshCount, 15_000);
+    const id = setInterval(refreshCount, 5_000);
     return () => clearInterval(id);
   }, [refreshCount]);
 
