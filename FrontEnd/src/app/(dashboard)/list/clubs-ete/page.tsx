@@ -332,10 +332,24 @@ export default function ClubsEtePage() {
                             </span>
                           </td>
                           <td className="py-2">
-                            {!p.paid && (
-                              <button onClick={async () => { await packsExt.markSummerPaid(p.id); loadPacks(); }}
-                                className="text-xs text-blue-600 hover:underline">Marquer payé</button>
-                            )}
+                            <div className="flex gap-2 items-center">
+                              {p.student_id && (
+                                <a href={`/student/${p.student_id}`}
+                                  className="text-xs px-2 py-1 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200">
+                                  Voir
+                                </a>
+                              )}
+                              {!p.paid && (
+                                <button onClick={async () => { await packsExt.markSummerPaid(p.id); loadPacks(); }}
+                                  className="text-xs px-2 py-1 rounded bg-green-50 text-green-600 hover:bg-green-100 border border-green-200">
+                                  Marquer payé
+                                </button>
+                              )}
+                              <button onClick={async () => { if (confirm('Supprimer cette inscription ?')) { await packsExt.deletePayment(p.id); loadPacks(); } }}
+                                className="text-xs px-2 py-1 rounded bg-red-50 text-red-600 hover:bg-red-100 border border-red-200">
+                                Supprimer
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       );

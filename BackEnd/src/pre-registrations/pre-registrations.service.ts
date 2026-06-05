@@ -72,24 +72,24 @@ export class PreRegistrationsService {
       data: {
         full_name:         reg.child_full_name,
         date_of_birth:     reg.date_of_birth,
-        gender:            dto.gender ?? reg.gender ?? 'M',
+        gender:            reg.gender ?? 'M',
         class_id:          dto.class_id,
         grade:             reg.desired_class || 'PS',
         schedule_id:       dto.schedule_id || null,
         registration_date: new Date(),
-        transport_mode:    dto.transport_mode ?? 'parent',
+        transport_mode:    'parent',
         archived:          false,
       },
     });
 
-    // 2. Créer le pack financier
+    // 2. Créer le pack financier (valeurs par défaut, à configurer dans la fiche élève)
     const now = new Date();
     await this.prisma.studentPack.create({
       data: {
         student_id:         student.id,
         school_year:        reg.school_year || `${now.getFullYear()}-${now.getFullYear() + 1}`,
-        scolarite_amount:   dto.monthly_fee,
-        tarif_base:         dto.monthly_fee,
+        scolarite_amount:   0,
+        tarif_base:         0,
         regime:             'journee_complete',
         start_month:        now.getMonth() + 1,
         end_month:          6,

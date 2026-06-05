@@ -37,12 +37,8 @@ function ApproveScolariteModal({ reg, onConfirm, onClose }: { reg: any; onConfir
   const [classes,   setClasses]   = useState<any[]>([]);
   const [schedules, setSchedules] = useState<any[]>([]);
   const [form, setForm] = useState({
-    class_id:       '',
-    schedule_id:    '',
-    monthly_fee:    '',
-    pack_type:      'mensuel',
-    transport_mode: 'parent',
-    gender:         reg.gender ?? 'M',
+    class_id:    '',
+    schedule_id: '',
   });
   const [saving, setSaving] = useState(false);
   const [error,  setError]  = useState('');
@@ -56,10 +52,9 @@ function ApproveScolariteModal({ reg, onConfirm, onClose }: { reg: any; onConfir
 
   const submit = async () => {
     if (!form.class_id) { setError('Sélectionnez une classe.'); return; }
-    if (!form.monthly_fee || isNaN(+form.monthly_fee)) { setError('Saisissez un tarif mensuel valide.'); return; }
     setSaving(true); setError('');
     try {
-      await onConfirm({ ...form, monthly_fee: parseFloat(form.monthly_fee) });
+      await onConfirm(form);
     } catch (e: any) { setError(e.message || 'Erreur'); setSaving(false); }
   };
 
@@ -79,14 +74,7 @@ function ApproveScolariteModal({ reg, onConfirm, onClose }: { reg: any; onConfir
 
           {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Genre</label>
-              <select value={form.gender} onChange={e => set('gender', e.target.value)} className={iCls}>
-                <option value="M">Garçon</option>
-                <option value="F">Fille</option>
-              </select>
-            </div>
+          <div className="flex flex-col gap-4">
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">Classe *</label>
               <select value={form.class_id} onChange={e => set('class_id', e.target.value)} className={iCls}>
@@ -95,27 +83,10 @@ function ApproveScolariteModal({ reg, onConfirm, onClose }: { reg: any; onConfir
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Emploi du temps</label>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Emploi du temps (optionnel)</label>
               <select value={form.schedule_id} onChange={e => set('schedule_id', e.target.value)} className={iCls}>
                 <option value="">— Aucun —</option>
                 {schedules.map(s => <option key={s.id} value={s.id}>{s.name} ({s.start_time}–{s.end_time})</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Transport</label>
-              <select value={form.transport_mode} onChange={e => set('transport_mode', e.target.value)} className={iCls}>
-                {TRANSPORT.map(t => <option key={t} value={t}>{t}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Tarif mensuel (DT) *</label>
-              <input type="number" min="0" step="0.5" value={form.monthly_fee}
-                onChange={e => set('monthly_fee', e.target.value)} className={iCls} placeholder="Ex: 150" />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Type de pack</label>
-              <select value={form.pack_type} onChange={e => set('pack_type', e.target.value)} className={iCls}>
-                {PACK_TYPES.map(p => <option key={p} value={p}>{p}</option>)}
               </select>
             </div>
           </div>
