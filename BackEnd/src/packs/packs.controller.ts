@@ -72,6 +72,11 @@ export class PacksController {
     return this.service.getSummerPacks(month ? +month : undefined, year ? +year : undefined);
   }
 
+  @Put('summer/:id')
+  updateSummerPack(@Param('id') id: string, @Body() dto: any) {
+    return this.service.updateSummerPack(id, dto);
+  }
+
   @Put('summer/:id/pay')
   markSummerPaid(@Param('id') id: string) {
     return this.service.markSummerPackPaid(id);

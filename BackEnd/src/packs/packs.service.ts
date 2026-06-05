@@ -330,6 +330,24 @@ export class PacksService {
     });
   }
 
+  async updateSummerPack(id: string, dto: any) {
+    const clubsJson = dto.clubs_json || [];
+    const packAmount = parseFloat(dto.pack_amount) || 0;
+    const clubsTotal = clubsJson.reduce((sum: number, c: any) => sum + (parseFloat(c.price) || 0), 0);
+    const total = packAmount + clubsTotal;
+
+    return this.prisma.summerPack.update({
+      where: { id },
+      data: {
+        month:        dto.month,
+        year:         dto.year,
+        pack_amount:  packAmount,
+        clubs_json:   clubsJson,
+        total_amount: total,
+      },
+    });
+  }
+
   // ── Créer un élève externe ───────────────────────────────────
   async createExternalStudent(dto: any) {
     return this.prisma.externalStudent.create({

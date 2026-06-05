@@ -212,6 +212,7 @@ export const packsExt = {
   createSummerPack: (data: any) => apiFetch<any>('/packs/summer', { method: 'POST', body: JSON.stringify(data) }),
   getSummerPacks:   (month?: number, year?: number) =>
     apiFetch<any[]>(`/packs/summer${month ? `?month=${month}&year=${year}` : ''}`),
+  updateSummerPack: (id: string, data: any) => apiFetch<any>(`/packs/summer/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   markSummerPaid:   (id: string) => apiFetch<any>(`/packs/summer/${id}/pay`, { method: 'PUT' }),
   deletePayment:    (id: string) => apiFetch<any>(`/packs/payment/${id}`, { method: 'DELETE' }),
   createExternal:   (data: any) => apiFetch<any>('/packs/external-students', { method: 'POST', body: JSON.stringify(data) }),

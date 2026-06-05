@@ -56,8 +56,12 @@ const InscriptionModal = ({ pack, students, clubsEte, onClose, onSuccess }: {
       const clubsTotal = Object.values(selectedClubs).reduce((s, c) => s + (parseFloat(c.price) || 0), 0);
 
       if (pack) {
-        // Mise à jour (TODO: ajouter endpoint update dans backend)
-        alert("Modification non encore implémentée côté backend");
+        // Mise à jour
+        await packsExt.updateSummerPack(pack.id, {
+          month, year, pack_amount: packAmt,
+          clubs_json: clubsJson,
+          total_amount: packAmt + clubsTotal,
+        });
       } else {
         // Création
         let externalId: string | null = null;
@@ -456,6 +460,10 @@ export default function ClubsEtePage() {
                                 Marquer payé
                               </button>
                             )}
+                            <button onClick={() => handleEdit(p)}
+                              className="text-xs px-2 py-1 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200">
+                              Modifier
+                            </button>
                             <button onClick={() => handleDelete(p.id)}
                               className="text-xs px-2 py-1 rounded bg-red-50 text-red-600 hover:bg-red-100 border border-red-200">
                               Supprimer
