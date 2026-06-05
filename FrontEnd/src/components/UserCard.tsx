@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { dashboard } from '@/lib/api';
+import { useSchoolYear } from '@/lib/useSchoolYear';
 
 const CARD_CONFIG: Record<string, { label: string; icon: string }> = {
   student:  { label: 'Enfants',      icon: '/student.png' },
@@ -13,6 +14,7 @@ const CARD_CONFIG: Record<string, { label: string; icon: string }> = {
 
 const UserCard = ({ type }: { type: 'student' | 'teacher' | 'parent' | 'staff' }) => {
   const [count, setCount] = useState<number | null>(null);
+  const { currentYear } = useSchoolYear();
   const config = CARD_CONFIG[type];
 
   useEffect(() => {
@@ -32,10 +34,12 @@ const UserCard = ({ type }: { type: 'student' | 'teacher' | 'parent' | 'staff' }
   return (
     <div className="rounded-2xl odd:bg-BKprimary even:bg-BKyellow p-4 flex-1 min-w-[130px] flex flex-col gap-2">
       <div className="flex justify-between items-center w-full">
-        <span className="text-[10px] bg-white px-2 py-1 rounded-full text-green-600">
-          2025/2026
-        </span>
-        <Image src="/more.png" alt="" width={20} height={20} />
+        {currentYear && (
+          <span className="text-[10px] bg-white px-2 py-1 rounded-full text-green-600 font-medium">
+            {currentYear}
+          </span>
+        )}
+        <Image src="/more.png" alt="" width={20} height={20} className="ml-auto" />
       </div>
 
       {count === null ? (
