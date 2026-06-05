@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Image from 'next/image';
-import { payments } from '@/lib/api';
+import { payments, teachers } from '@/lib/api';
 
 const MOIS = ['Jan','Fév','Mars','Avr','Mai','Juin','Juil','Août','Sept','Oct','Nov','Déc'];
 
@@ -13,17 +13,34 @@ const FinanceChart = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([payments.treasury(), payments.list(1)])
-      .then(([treasury, paymentList]) => {
+    const currentYear = new Date().getFullYear();
+
+    Promise.all([
+      payments.treasury(),
+      payments.list(1, 'paid'),  // Recettes élèves payées
+      teachers.salaryPayments.all(undefined, currentYear, undefined, 'paid')  // Dépenses personnel payées
+    ])
+      .then(([treasury, studentPayments, staffPayments]) => {
         setStats(treasury);
-        // Regrouper par mois
+
+        // Initialiser les mois
         const monthly: Record<number, { recettes: number; depenses: number }> = {};
         MOIS.forEach((_, i) => { monthly[i] = { recettes: 0, depenses: 0 }; });
 
-        (paymentList.data || []).forEach((p: any) => {
-          const m = new Date(p.paid_date || p.due_date).getMonth();
-          if (p.status === 'paid') monthly[m].recettes += p.amount;
-          else monthly[m].depenses += p.amount;
+        // Recettes = paiements élèves payés
+        (studentPayments.data || []).forEach((p: any) => {
+          if (p.paid_date) {
+            const m = new Date(p.paid_date).getMonth();
+            monthly[m].recettes += Number(p.amount) || 0;
+          }
+        });
+
+        // Dépenses = salaires personnel payés
+        (staffPayments || []).forEach((p: any) => {
+          if (p.paid_at) {
+            const m = new Date(p.paid_at).getMonth();
+            monthly[m].depenses += Number(p.amount) || 0;
+          }
         });
 
         setData(MOIS.map((name, i) => ({ name, ...monthly[i] })));

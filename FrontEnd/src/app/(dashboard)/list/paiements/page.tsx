@@ -17,10 +17,163 @@ const FONCTION_META: Record<string, { label: string; icon: string }> = {
 };
 
 // ════════════════════════════════════════════════════════════════
-//  ONGLET RECETTES — Frais élèves
+//  ONGLET RECETTES — Vue globale
+// ════════════════════════════════════════════════════════════════
+const RecettesGlobaleView = () => {
+  const now = new Date();
+  const [allPayments, setAllPayments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filterYear, setFilterYear] = useState(now.getFullYear());
+  const [filterMonth, setFilterMonth] = useState<number | "">(now.getMonth() + 1);
+  const [filterStatus, setFilterStatus] = useState<"" | "paid" | "pending" | "overdue">("");
+
+  const loadAll = useCallback(() => {
+    setLoading(true);
+    // Charger tous les paiements élèves (via l'endpoint existant)
+    payments.list(1, filterStatus || undefined)
+      .then(res => setAllPayments(res.data || []))
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [filterStatus]);
+
+  useEffect(() => { loadAll(); }, [loadAll]);
+
+  // Filtrer par mois/année localement
+  const filtered = allPayments.filter(p => {
+    const date = new Date(p.paid_date || p.due_date);
+    if (filterYear && date.getFullYear() !== filterYear) return false;
+    if (filterMonth !== "" && date.getMonth() + 1 !== filterMonth) return false;
+    return true;
+  });
+
+  const totalPaid = filtered.filter(p => p.status === 'paid').reduce((s, p) => s + Number(p.amount), 0);
+  const totalPending = filtered.filter(p => p.status === 'pending').reduce((s, p) => s + Number(p.amount), 0);
+  const totalOverdue = filtered.filter(p => p.status === 'overdue').reduce((s, p) => s + Number(p.amount), 0);
+  const fmt = (n: number) => n.toLocaleString("fr-TN", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+
+  const statusStyle: Record<string, string> = {
+    paid:    "bg-green-100 text-green-700",
+    pending: "bg-yellow-100 text-yellow-700",
+    overdue: "bg-red-100 text-red-700",
+  };
+  const statusLabel: Record<string, string> = {
+    paid: "Payé", pending: "En attente", overdue: "En retard",
+  };
+
+  return (
+    <div className="flex flex-col gap-5">
+      {/* Filtres */}
+      <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm flex flex-wrap gap-3 items-end">
+        <div className="flex flex-col gap-1">
+          <label className="text-xs text-gray-500 font-medium">Année</label>
+          <input type="number" value={filterYear} onChange={e => setFilterYear(+e.target.value)}
+            className="border rounded-lg px-2 py-1.5 text-sm w-20 focus:outline-none focus:ring-1 focus:ring-blue-400"
+            min="2020" max="2099" />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs text-gray-500 font-medium">Mois</label>
+          <select value={filterMonth} onChange={e => setFilterMonth(e.target.value === "" ? "" : +e.target.value)}
+            className="border rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400">
+            <option value="">Tous</option>
+            {MOIS_LABELS.map((m, i) => <option key={i+1} value={i+1}>{m}</option>)}
+          </select>
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs text-gray-500 font-medium">Statut</label>
+          <select value={filterStatus} onChange={e => setFilterStatus(e.target.value as any)}
+            className="border rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400">
+            <option value="">Tous</option>
+            <option value="paid">Payé</option>
+            <option value="pending">En attente</option>
+            <option value="overdue">En retard</option>
+          </select>
+        </div>
+        {(filterStatus || filterMonth !== "") && (
+          <button onClick={() => { setFilterStatus(""); setFilterMonth(""); }}
+            className="text-xs text-red-500 hover:text-red-700 px-3 py-1.5 border border-red-200 rounded-lg hover:bg-red-50 transition">
+            ✕ Réinitialiser
+          </button>
+        )}
+      </div>
+
+      {/* Statistiques */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm text-center">
+          <p className="text-xs text-gray-400 mb-1">Total recettes</p>
+          <p className="text-xl font-bold text-gray-800">{fmt(totalPaid + totalPending + totalOverdue)} <span className="text-sm font-normal text-gray-400">DT</span></p>
+        </div>
+        <div className="bg-green-50 border border-green-200 rounded-xl p-4 shadow-sm text-center">
+          <p className="text-xs text-green-600 mb-1">Payé</p>
+          <p className="text-xl font-bold text-green-700">{fmt(totalPaid)} <span className="text-sm font-normal text-green-400">DT</span></p>
+          <p className="text-xs text-green-500 mt-1">{filtered.filter(p => p.status === 'paid').length} paiement{filtered.filter(p => p.status === 'paid').length > 1 ? 's' : ''}</p>
+        </div>
+        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 shadow-sm text-center">
+          <p className="text-xs text-yellow-600 mb-1">En attente</p>
+          <p className="text-xl font-bold text-yellow-600">{fmt(totalPending)} <span className="text-sm font-normal text-yellow-300">DT</span></p>
+          <p className="text-xs text-yellow-400 mt-1">{filtered.filter(p => p.status === 'pending').length} paiement{filtered.filter(p => p.status === 'pending').length > 1 ? 's' : ''}</p>
+        </div>
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 shadow-sm text-center">
+          <p className="text-xs text-red-600 mb-1">En retard</p>
+          <p className="text-xl font-bold text-red-600">{fmt(totalOverdue)} <span className="text-sm font-normal text-red-300">DT</span></p>
+          <p className="text-xs text-red-400 mt-1">{filtered.filter(p => p.status === 'overdue').length} paiement{filtered.filter(p => p.status === 'overdue').length > 1 ? 's' : ''}</p>
+        </div>
+      </div>
+
+      {/* Tableau */}
+      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        {loading ? (
+          <p className="text-center py-12 text-gray-400 text-sm">Chargement...</p>
+        ) : filtered.length === 0 ? (
+          <p className="text-center py-12 text-gray-400 text-sm">Aucun paiement pour ces critères</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Élève</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Description</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Date</th>
+                  <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Montant</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((p, idx) => (
+                  <tr key={p.id} className={`border-b border-gray-100 ${idx % 2 === 0 ? "" : "bg-slate-50/50"}`}>
+                    <td className="px-4 py-3 font-medium text-gray-800">
+                      <a href={`/student/${p.student_id}`} className="hover:text-blue-600 hover:underline">
+                        {p.student?.full_name || "—"}
+                      </a>
+                    </td>
+                    <td className="px-4 py-3 text-gray-600">{p.description || p.type}</td>
+                    <td className="px-4 py-3 text-gray-500 text-xs">
+                      {p.paid_date
+                        ? new Date(p.paid_date).toLocaleDateString("fr-TN")
+                        : new Date(p.due_date).toLocaleDateString("fr-TN")}
+                    </td>
+                    <td className="px-4 py-3 text-right font-semibold text-gray-800">{Number(p.amount).toFixed(0)} DT</td>
+                    <td className="px-4 py-3">
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusStyle[p.status] || ""}`}>
+                        {statusLabel[p.status] || p.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ════════════════════════════════════════════════════════════════
+//  ONGLET RECETTES — Frais élèves (par élève)
 // ════════════════════════════════════════════════════════════════
 const RecettesTab = ({ initStudentId }: { initStudentId?: string }) => {
   const router = useRouter();
+  const [view, setView] = useState<"global" | "student">("global");
   const [search, setSearch]           = useState("");
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [selectedStudent, setSelected] = useState<any | null>(null);
@@ -94,6 +247,26 @@ const RecettesTab = ({ initStudentId }: { initStudentId?: string }) => {
 
   return (
     <div className="flex flex-col gap-5">
+      {/* Toggle Vue */}
+      <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
+        <button onClick={() => setView("global")}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+            view === "global" ? "bg-white text-blue-700 shadow-sm" : "text-gray-500 hover:text-gray-700"
+          }`}>
+          📊 Vue globale
+        </button>
+        <button onClick={() => setView("student")}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+            view === "student" ? "bg-white text-blue-700 shadow-sm" : "text-gray-500 hover:text-gray-700"
+          }`}>
+          👤 Par élève
+        </button>
+      </div>
+
+      {view === "global" ? (
+        <RecettesGlobaleView />
+      ) : (
+        <>
       {/* Sélecteur élève */}
       <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
         <h2 className="text-sm font-semibold text-gray-700 mb-3">Sélectionner un élève</h2>
@@ -196,6 +369,8 @@ const RecettesTab = ({ initStudentId }: { initStudentId?: string }) => {
             </div>
           ))}
         </div>
+      )}
+        </>
       )}
     </div>
   );
