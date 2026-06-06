@@ -10,7 +10,7 @@ import { JwtStrategy } from './jwt.strategy';
     PassportModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'brainy-kids-secret-2025',
-      signOptions: { expiresIn: '24h' },
+      signOptions: { expiresIn: '15m' }, // Access token court
     }),
   ],
   controllers: [AuthController],

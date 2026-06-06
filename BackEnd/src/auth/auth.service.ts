@@ -1,6 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { randomBytes } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -33,9 +34,27 @@ export class AuthService {
 
     if (!valid) throw new UnauthorizedException('Identifiants incorrects');
 
+    // Générer access token (15 min)
     const payload = { sub: user.id, username: user.username, role: user.role };
+    const accessToken = this.jwtService.sign(payload);
+
+    // Générer refresh token (7 jours) et stocker en DB
+    const refreshToken = randomBytes(64).toString('hex');
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7); // 7 jours
+
+    await this.prisma.refreshToken.create({
+      data: {
+        user_id: user.id,
+        token: refreshToken,
+        expires_at: expiresAt,
+      },
+    });
+
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: accessToken,
+      refresh_token: refreshToken,
+      expires_in: 900, // 15 minutes en secondes
       user: {
         id: user.id,
         username: user.username,
@@ -44,6 +63,70 @@ export class AuthService {
         email: user.email,
       },
     };
+  }
+
+  async refresh(refreshToken: string) {
+    // Vérifier que le refresh token existe et n'est pas révoqué
+    const token = await this.prisma.refreshToken.findUnique({
+      where: { token: refreshToken },
+      include: { user: true },
+    });
+
+    if (!token || token.revoked_at) {
+      throw new UnauthorizedException('Refresh token invalide');
+    }
+
+    // Vérifier l'expiration
+    if (new Date() > token.expires_at) {
+      throw new UnauthorizedException('Refresh token expiré');
+    }
+
+    // Révoquer l'ancien token (rotation)
+    const newRefreshToken = randomBytes(64).toString('hex');
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+
+    await this.prisma.refreshToken.update({
+      where: { id: token.id },
+      data: { revoked_at: new Date(), replaced_by: newRefreshToken },
+    });
+
+    // Créer le nouveau refresh token
+    await this.prisma.refreshToken.create({
+      data: {
+        user_id: token.user_id,
+        token: newRefreshToken,
+        expires_at: expiresAt,
+      },
+    });
+
+    // Générer nouveau access token
+    const payload = { sub: token.user.id, username: token.user.username, role: token.user.role };
+    const accessToken = this.jwtService.sign(payload);
+
+    return {
+      access_token: accessToken,
+      refresh_token: newRefreshToken,
+      expires_in: 900,
+    };
+  }
+
+  async logout(refreshToken: string) {
+    // Révoquer le refresh token
+    await this.prisma.refreshToken.updateMany({
+      where: { token: refreshToken },
+      data: { revoked_at: new Date() },
+    });
+    return { message: 'Déconnexion réussie' };
+  }
+
+  async logoutAll(userId: string) {
+    // Révoquer tous les refresh tokens de l'utilisateur (logout de tous les devices)
+    await this.prisma.refreshToken.updateMany({
+      where: { user_id: userId, revoked_at: null },
+      data: { revoked_at: new Date() },
+    });
+    return { message: 'Déconnexion de tous les appareils réussie' };
   }
 
   async getProfile(userId: string) {

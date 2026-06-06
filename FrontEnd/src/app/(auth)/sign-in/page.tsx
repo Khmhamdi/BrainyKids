@@ -23,13 +23,13 @@ export default function LoginPage() {
     try {
       const { access_token, user } = await auth.login(form.username, form.password);
 
-      // Stocker dans localStorage
-      localStorage.setItem('bk_token', access_token);
+      // auth.login() stocke déjà access_token et refresh_token automatiquement
+      // On stocke juste l'utilisateur et les cookies pour le middleware
       localStorage.setItem('bk_user', JSON.stringify(user));
 
-      // Stocker dans des cookies pour le middleware Next.js
-      document.cookie = `bk_token=${access_token}; path=/; max-age=86400; SameSite=Strict`;
-      document.cookie = `bk_role=${user.role}; path=/; max-age=86400; SameSite=Strict`;
+      // Stocker dans des cookies pour le middleware Next.js (15 min comme le token)
+      document.cookie = `bk_token=${access_token}; path=/; max-age=900; SameSite=Strict`;
+      document.cookie = `bk_role=${user.role}; path=/; max-age=900; SameSite=Strict`;
 
       router.push(getDashboardPath(user.role));
     } catch (err: any) {

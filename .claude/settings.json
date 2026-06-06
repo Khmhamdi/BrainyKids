@@ -1,4 +1,4 @@
-{"model": "claude-sonnet-4-5",
+{
   "permissions": {
     "allow": [
       "Bash(docker build *)",
@@ -9,7 +9,12 @@
       "Bash(Select-Object FullName)",
       "Bash(Sort-Object FullName)",
       "Bash(grep -E \"\\\\.\\(tsx|ts|jsx|js\\)$\")",
-      "Bash(xargs ls -la)"
+      "Bash(xargs ls -la)",
+      "Bash(curl -s \"https://api.github.com/repos/Khmhamdi/BrainyKids/actions/runs?per_page=5\")",
+      "Bash(git reset *)",
+      "Bash(curl -s \"https://api.github.com/repos/Khmhamdi/BrainyKids/actions/runs?per_page=3&branch=main\")",
+      "Bash(curl -s \"https://api.github.com/repos/Khmhamdi/BrainyKids/actions/runs?per_page=2&branch=main\")"
     ]
-  }
+  },
+  "model": "claude-sonnet-4-5"
 }

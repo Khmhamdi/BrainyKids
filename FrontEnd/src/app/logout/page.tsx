@@ -1,16 +1,19 @@
 'use client';
 
 import { useEffect } from 'react';
+import { auth } from '@/lib/api';
 
 export default function LogoutPage() {
   useEffect(() => {
-    // Vider localStorage
-    localStorage.removeItem('bk_token');
-    localStorage.removeItem('bk_user');
-    // Vider le cookie
-    document.cookie = 'bk_token=; path=/; max-age=0';
-    // Rediriger vers login
-    window.location.href = '/sign-in';
+    // Révoquer le refresh token côté serveur et vider les tokens locaux
+    auth.logout().finally(() => {
+      // Vider aussi l'utilisateur et les cookies
+      localStorage.removeItem('bk_user');
+      document.cookie = 'bk_token=; path=/; max-age=0';
+      document.cookie = 'bk_role=; path=/; max-age=0';
+      // Rediriger vers login
+      window.location.href = '/sign-in';
+    });
   }, []);
 
   return (

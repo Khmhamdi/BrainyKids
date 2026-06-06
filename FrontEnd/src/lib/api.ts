@@ -11,8 +11,86 @@ function getToken(): string | null {
   return localStorage.getItem('bk_token');
 }
 
-// ─── Fetch avec authentification ─────────────────────────────
+function getRefreshToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem('bk_refresh_token');
+}
+
+function getTokenExpiration(): number | null {
+  if (typeof window === 'undefined') return null;
+  const exp = localStorage.getItem('bk_token_exp');
+  return exp ? parseInt(exp, 10) : null;
+}
+
+function setTokens(accessToken: string, refreshToken: string, expiresIn: number) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem('bk_token', accessToken);
+  localStorage.setItem('bk_refresh_token', refreshToken);
+  // Stocker le timestamp d'expiration (maintenant + expiresIn)
+  const expirationTime = Date.now() + expiresIn * 1000;
+  localStorage.setItem('bk_token_exp', expirationTime.toString());
+}
+
+function clearTokens() {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem('bk_token');
+  localStorage.removeItem('bk_refresh_token');
+  localStorage.removeItem('bk_token_exp');
+}
+
+// ─── Auto-refresh si token proche de l'expiration ─────────────
+let refreshPromise: Promise<void> | null = null;
+
+async function refreshTokenIfNeeded(): Promise<void> {
+  const expiration = getTokenExpiration();
+  if (!expiration) return;
+
+  // Si le token expire dans moins de 2 minutes, refresh
+  const timeUntilExpiry = expiration - Date.now();
+  if (timeUntilExpiry < 2 * 60 * 1000) {
+    // Éviter les appels parallèles de refresh
+    if (refreshPromise) return refreshPromise;
+
+    refreshPromise = (async () => {
+      try {
+        const refreshToken = getRefreshToken();
+        if (!refreshToken) {
+          clearTokens();
+          window.location.href = '/sign-in';
+          return;
+        }
+
+        const res = await fetch(`${API_BASE}/auth/refresh`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refresh_token: refreshToken }),
+        });
+
+        if (!res.ok) {
+          clearTokens();
+          window.location.href = '/sign-in';
+          return;
+        }
+
+        const data = await res.json();
+        setTokens(data.access_token, data.refresh_token, data.expires_in);
+      } catch (error) {
+        clearTokens();
+        window.location.href = '/sign-in';
+      } finally {
+        refreshPromise = null;
+      }
+    })();
+
+    return refreshPromise;
+  }
+}
+
+// ─── Fetch avec authentification + auto-refresh ──────────────
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
+  // Auto-refresh si nécessaire avant la requête
+  await refreshTokenIfNeeded();
+
   const token = getToken();
   const res = await fetch(`${API_BASE}${path}`, {
     ...options,
@@ -22,6 +100,14 @@ async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
       ...options?.headers,
     },
   });
+
+  // Si 401 Unauthorized, le token est invalide → logout
+  if (res.status === 401) {
+    clearTokens();
+    window.location.href = '/sign-in';
+    throw new Error('Session expirée');
+  }
+
   if (!res.ok) {
     const error = await res.json().catch(() => ({ message: 'Erreur réseau' }));
     throw new Error(error.message || `Erreur ${res.status}`);
@@ -31,13 +117,41 @@ async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
 
 // ─── Auth ─────────────────────────────────────────────────────
 export const auth = {
-  login: (username: string, password: string) =>
-    apiFetch<{ access_token: string; user: any }>('/auth/login', {
+  login: async (username: string, password: string) => {
+    const data = await apiFetch<{ access_token: string; refresh_token: string; expires_in: number; user: any }>('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ username, password }),
-    }),
+    });
+    // Stocker les tokens
+    setTokens(data.access_token, data.refresh_token, data.expires_in);
+    return data;
+  },
+  refresh: async () => {
+    const refreshToken = getRefreshToken();
+    if (!refreshToken) throw new Error('Pas de refresh token');
+    const data = await apiFetch<{ access_token: string; refresh_token: string; expires_in: number }>('/auth/refresh', {
+      method: 'POST',
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    });
+    setTokens(data.access_token, data.refresh_token, data.expires_in);
+    return data;
+  },
+  logout: async () => {
+    const refreshToken = getRefreshToken();
+    if (refreshToken) {
+      await apiFetch('/auth/logout', {
+        method: 'POST',
+        body: JSON.stringify({ refresh_token: refreshToken }),
+      }).catch(() => {}); // Ignorer les erreurs de logout
+    }
+    clearTokens();
+  },
+  logoutAll: () => apiFetch('/auth/logout-all', { method: 'POST' }),
   me: () => apiFetch<any>('/auth/me'),
 };
+
+// Exporter les fonctions de gestion des tokens
+export { setTokens, clearTokens };
 
 // ─── Dashboard ────────────────────────────────────────────────
 export const dashboard = {

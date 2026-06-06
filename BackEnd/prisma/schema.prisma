@@ -20,6 +20,7 @@ model User {
   teachers      Teacher[]
   parents       Parent[]
   notifications Notification[]
+  refresh_tokens RefreshToken[]
 }
 
 model Teacher {
@@ -418,4 +419,18 @@ model SchoolYear {
   is_active   Boolean  @default(true)
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
+}
+
+model RefreshToken {
+  id              String   @id @default(uuid())
+  user_id         String
+  token           String   @unique
+  expires_at      DateTime
+  created_at      DateTime @default(now())
+  revoked_at      DateTime?
+  replaced_by     String?  // Pour la rotation des tokens
+  user            User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([token])
 }
