@@ -10,6 +10,12 @@ const mockPrisma = {
     findUnique: jest.fn(),
     update: jest.fn(),
   },
+  refreshToken: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    update: jest.fn(),
+    updateMany: jest.fn(),
+  },
 };
 
 const mockJwt = {
@@ -52,12 +58,23 @@ describe('AuthService', () => {
         role: 'administrator', full_name: 'Admin', email: 'a@b.com',
       });
       mockPrisma.user.update.mockResolvedValue({});
+      mockPrisma.refreshToken.create.mockResolvedValue({
+        id: 'refresh-id',
+        user_id: '1',
+        token: 'mock-refresh-token',
+        expires_at: new Date(),
+        created_at: new Date(),
+      });
 
       const result = await service.login('admin', 'admin123');
       expect(result).toHaveProperty('access_token', 'mock.jwt.token');
+      expect(result).toHaveProperty('refresh_token');
+      expect(result).toHaveProperty('expires_in', 900);
       expect(result.user).toHaveProperty('username', 'admin');
       // Le mot de passe doit être hashé après premier login
       expect(mockPrisma.user.update).toHaveBeenCalled();
+      // Le refresh token doit être créé
+      expect(mockPrisma.refreshToken.create).toHaveBeenCalled();
     });
   });
 
