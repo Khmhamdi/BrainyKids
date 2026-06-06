@@ -22,9 +22,12 @@ const InscriptionModal = ({ pack, students, clubsEte, onClose, onSuccess }: {
   const [month, setMonth] = useState(pack?.month || 7);
   const [year, setYear] = useState(pack?.year || new Date().getFullYear());
   const [packAmount, setPackAmount] = useState(String(pack?.pack_amount || 0));
-  const [selectedClubs, setSelectedClubs] = useState<Record<string, { name: string; price: string }>>(
-    (pack?.clubs_json || []).reduce((acc: any, c: any) => ({ ...acc, [c.clubId]: { name: c.name, price: String(c.price) } }), {})
-  );
+
+  // Clubs : tableau au lieu d'objet (comme PackForm)
+  const [clubs, setClubs] = useState<{ clubId: string; name: string; price: number }[]>(pack?.clubs_json || []);
+  const [newClubId, setNewClubId] = useState(clubsEte[0]?.id || "");
+  const [newClubPrice, setNewClubPrice] = useState("");
+
   const [fullName, setFullName] = useState(pack?.external_student?.full_name || "");
   const [dob, setDob] = useState(pack?.external_student?.date_of_birth?.split('T')[0] || "");
   const [gender, setGender] = useState(pack?.external_student?.gender || "M");
@@ -34,11 +37,32 @@ const InscriptionModal = ({ pack, students, clubsEte, onClose, onSuccess }: {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  const toggleClub = (club: any) => {
-    setSelectedClubs(prev => {
-      if (prev[club.id]) { const next = { ...prev }; delete next[club.id]; return next; }
-      return { ...prev, [club.id]: { name: club.name, price: String(club.price ?? 0) } };
-    });
+  const handleAddClub = () => {
+    const club = clubsEte.find(c => c.id === newClubId);
+    if (!club) return;
+
+    const price = parseFloat(newClubPrice) || club.price || 0;
+
+    // Vérifier si le club n'est pas déjà ajouté
+    if (clubs.some(c => c.clubId === club.id)) {
+      setError("Ce club est déjà ajouté");
+      return;
+    }
+
+    setClubs([...clubs, { clubId: club.id, name: club.name, price }]);
+    setNewClubPrice("");
+    setError("");
+  };
+
+  const handleRemoveClub = (index: number) => {
+    setClubs(clubs.filter((_, i) => i !== index));
+  };
+
+  const handleClubSelect = (clubId: string) => {
+    setNewClubId(clubId);
+    const club = clubsEte.find(c => c.id === clubId);
+    if (club?.price) setNewClubPrice(String(club.price));
+    else setNewClubPrice("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -49,11 +73,13 @@ const InscriptionModal = ({ pack, students, clubsEte, onClose, onSuccess }: {
     }
     setSaving(true); setError("");
     try {
-      const clubsJson = Object.entries(selectedClubs).map(([clubId, c]) => ({
-        clubId, name: c.name, price: parseFloat(c.price) || 0,
+      const clubsJson = clubs.map(c => ({
+        clubId: c.clubId,
+        name: c.name,
+        price: c.price,
       }));
       const packAmt = parseFloat(packAmount) || 0;
-      const clubsTotal = Object.values(selectedClubs).reduce((s, c) => s + (parseFloat(c.price) || 0), 0);
+      const clubsTotal = clubs.reduce((s, c) => s + c.price, 0);
 
       if (pack) {
         // Mise à jour
@@ -88,7 +114,7 @@ const InscriptionModal = ({ pack, students, clubsEte, onClose, onSuccess }: {
   };
 
   const packAmt = parseFloat(packAmount) || 0;
-  const clubsTotal = Object.values(selectedClubs).reduce((s, c) => s + (parseFloat(c.price) || 0), 0);
+  const clubsTotal = clubs.reduce((s, c) => s + c.price, 0);
   const totalAmount = packAmt + clubsTotal;
 
   return (
@@ -159,32 +185,52 @@ const InscriptionModal = ({ pack, students, clubsEte, onClose, onSuccess }: {
           {/* Tarif pack */}
           <div><label className={labelCls}>Tarif pack de base (DT)</label><input type="number" value={packAmount} onChange={e => setPackAmount(e.target.value)} className={inputCls} min={0} placeholder="0" step="0.5" /></div>
 
-          {/* Clubs */}
+          {/* Clubs optionnels payants */}
           {clubsEte.length > 0 && (
             <div className="bg-gray-50 rounded-lg p-4">
-              <p className="text-sm font-semibold text-gray-700 mb-3">Clubs supplémentaires (options payantes)</p>
-              <div className="flex flex-col gap-2">
-                {clubsEte.map(club => {
-                  const selected = !!selectedClubs[club.id];
-                  return (
-                    <div key={club.id} className={`flex items-center gap-3 p-2 rounded-lg border transition ${selected ? "border-orange-300 bg-orange-50" : "border-gray-200 bg-white"}`}>
-                      <input type="checkbox" checked={selected} onChange={() => toggleClub(club)} className="w-4 h-4 accent-orange-500 shrink-0" />
-                      <span className="text-sm flex-1 font-medium">{club.name}</span>
-                      {selected ? (
-                        <div className="flex items-center gap-1">
-                          <input type="number"
-                            value={selectedClubs[club.id].price}
-                            onChange={e => setSelectedClubs(prev => ({ ...prev, [club.id]: { ...prev[club.id], price: e.target.value } }))}
-                            className="border rounded p-1 text-sm w-20 text-right focus:outline-none focus:ring-1 focus:ring-orange-400"
-                            min={0} step={0.5} />
-                          <span className="text-xs text-gray-400">DT</span>
-                        </div>
-                      ) : (
-                        <span className="text-xs text-green-600 font-medium">{club.price} DT</span>
-                      )}
-                    </div>
-                  );
-                })}
+              <p className="text-sm font-semibold text-gray-700 mb-3">Clubs optionnels payants</p>
+
+              {/* Liste des clubs ajoutés */}
+              {clubs.map((c, i) => (
+                <div key={i} className="flex items-center gap-2 mb-2 text-sm">
+                  <span className="flex-1 bg-white border border-gray-200 rounded px-3 py-2">{c.name}</span>
+                  <span className="w-28 text-right font-medium text-gray-600">{c.price} DT/mois</span>
+                  <button type="button" onClick={() => handleRemoveClub(i)}
+                    className="text-red-400 hover:text-red-600 text-lg px-2 py-1">✕</button>
+                </div>
+              ))}
+
+              {/* Formulaire d'ajout */}
+              <div className="flex gap-2 mt-3 items-end">
+                <div className="flex flex-col flex-1">
+                  <label className={labelCls}>Club</label>
+                  <select
+                    value={newClubId}
+                    onChange={e => handleClubSelect(e.target.value)}
+                    className={inputCls}
+                  >
+                    {clubsEte.length === 0
+                      ? <option value="">Chargement…</option>
+                      : clubsEte.map(c => <option key={c.id} value={c.id}>{c.name}</option>)
+                    }
+                  </select>
+                </div>
+                <div className="flex flex-col flex-1">
+                  <label className={labelCls}>Montant (DT/mois)</label>
+                  <input
+                    type="number"
+                    value={newClubPrice}
+                    onChange={e => setNewClubPrice(e.target.value)}
+                    className={inputCls}
+                    min={0}
+                    step={0.5}
+                    placeholder="0"
+                  />
+                </div>
+                <button type="button" onClick={handleAddClub}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">
+                  + Ajouter
+                </button>
               </div>
             </div>
           )}
@@ -194,9 +240,9 @@ const InscriptionModal = ({ pack, students, clubsEte, onClose, onSuccess }: {
             <div className="grid grid-cols-2 gap-1 text-sm">
               <span className="text-gray-600">Pack de base</span>
               <span className="font-medium text-right">{packAmt.toFixed(2)} DT</span>
-              {Object.values(selectedClubs).map((c, i) => (
+              {clubs.map((c, i) => (
                 <><span key={`n${i}`} className="text-gray-600">{c.name}</span>
-                <span key={`p${i}`} className="font-medium text-right">{c.price} DT</span></>
+                <span key={`p${i}`} className="font-medium text-right">{c.price.toFixed(2)} DT</span></>
               ))}
               <span className="font-bold border-t pt-1 mt-1 text-gray-800">Total</span>
               <span className="font-bold text-right border-t pt-1 mt-1 text-orange-700">{totalAmount.toFixed(2)} DT</span>
@@ -244,7 +290,8 @@ export default function ClubsEtePage() {
   }, []);
 
   useEffect(() => {
-    clubsApi.list("ete", undefined, true).then(setClubsEte).catch(console.error);
+    // Charger TOUS les clubs (pas seulement "ete")
+    clubsApi.list(undefined, undefined, true).then(setClubsEte).catch(console.error);
     studentsApi.list(1, 500).then(r => setStudents(r.data || [])).catch(() => {});
     loadPacks();
   }, [loadPacks]);
